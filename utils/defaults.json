@@ -1,0 +1,141 @@
+{
+  "topics": [
+    {
+      "name": "Cardiovascular",
+      "query_fragment": "\"cardiovascular disease\"[tiab] OR atherosclerosis[tiab] OR \"coronary artery disease\"[tiab] OR ApoB[tiab] OR \"Lp(a)\"[tiab] OR PCSK9[tiab] OR \"heart failure\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Metabolism",
+      "query_fragment": "\"insulin resistance\"[tiab] OR hyperinsulinemia[tiab] OR \"metabolic syndrome\"[tiab] OR \"GLP-1\"[tiab] OR SGLT2[tiab] OR acarbose[tiab] OR \"glucose variability\"[tiab] OR CGM[tiab]",
+      "active": true
+    },
+    {
+      "name": "Exercise",
+      "query_fragment": "exercise[tiab] OR \"physical activity\"[tiab] OR \"resistance training\"[tiab] OR HIIT[tiab] OR VO2[tiab] OR \"zone 2\"[tiab] OR \"cardiorespiratory fitness\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Sleep",
+      "query_fragment": "sleep[tiab] OR \"sleep apnea\"[tiab] OR circadian[tiab] OR melatonin[tiab] OR CPAP[tiab] OR insomnia[tiab]",
+      "active": true
+    },
+    {
+      "name": "Neurodegeneration",
+      "query_fragment": "dementia[tiab] OR \"Alzheimer disease\"[tiab] OR neurodegeneration[tiab] OR \"cognitive decline\"[tiab] OR \"brain aging\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Senolytics",
+      "query_fragment": "senolytic*[tiab] OR senescence[tiab] OR \"senescent cells\"[tiab] OR dasatinib[tiab] OR quercetin[tiab] OR fisetin[tiab]",
+      "active": true
+    },
+    {
+      "name": "mTOR & Rapamycin",
+      "query_fragment": "rapamycin[tiab] OR \"mTOR\"[tiab] OR sirolimus[tiab] OR everolimus[tiab]",
+      "active": true
+    },
+    {
+      "name": "Biomarkers & Clocks",
+      "query_fragment": "\"epigenetic clock\"[tiab] OR \"DNA methylation\"[tiab] OR proteomic*[tiab] OR metabolomic*[tiab] OR biomarker*[tiab] OR \"biological age\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Fasting & CR",
+      "query_fragment": "\"caloric restriction\"[tiab] OR \"intermittent fasting\"[tiab] OR fasting[tiab] OR \"time-restricted eating\"[tiab] OR autophagy[tiab]",
+      "active": true
+    },
+    {
+      "name": "NAD+ & Sirtuins",
+      "query_fragment": "NAD[tiab] OR NMN[tiab] OR \"nicotinamide riboside\"[tiab] OR sirtuin*[tiab] OR SIRT1[tiab]",
+      "active": true
+    },
+    {
+      "name": "Metformin",
+      "query_fragment": "metformin[tiab] OR AMPK[tiab]",
+      "active": true
+    },
+    {
+      "name": "Hormones & HRT",
+      "query_fragment": "testosterone[tiab] OR \"hormone replacement\"[tiab] OR estrogen[tiab] OR DHEA[tiab] OR \"growth hormone\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Cancer Screening",
+      "query_fragment": "\"cancer screening\"[tiab] OR colonoscopy[tiab] OR \"liquid biopsy\"[tiab] OR \"early detection\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Bone Health",
+      "query_fragment": "osteoporosis[tiab] OR \"bone density\"[tiab] OR \"bone mineral\"[tiab] OR fracture[tiab]",
+      "active": true
+    },
+    {
+      "name": "Supplements",
+      "query_fragment": "spermidine[tiab] OR \"omega-3\"[tiab] OR \"fish oil\"[tiab] OR \"vitamin D\"[tiab] OR creatine[tiab]",
+      "active": true
+    }
+  ],
+  "authors_whitelist": [
+    {"author_name": "Kaeberlein M", "active": true},
+    {"author_name": "Barzilai N", "active": true},
+    {"author_name": "Sinclair DA", "active": true},
+    {"author_name": "Longo VD", "active": true},
+    {"author_name": "Fontana L", "active": true},
+    {"author_name": "Verdin E", "active": true},
+    {"author_name": "Kennedy BK", "active": true},
+    {"author_name": "Campisi J", "active": true},
+    {"author_name": "Lopez-Otin C", "active": true},
+    {"author_name": "Bhatt DL", "active": true},
+    {"author_name": "Ioannidis JPA", "active": true},
+    {"author_name": "Krauss RM", "active": true},
+    {"author_name": "Sniderman AD", "active": true},
+    {"author_name": "Ridker PM", "active": true},
+    {"author_name": "Sattar N", "active": true},
+    {"author_name": "de Cabo R", "active": true},
+    {"author_name": "Mannick JB", "active": true},
+    {"author_name": "Partridge L", "active": true}
+  ],
+  "authors_blacklist": [],
+  "exclusions": [
+    {"term": "pediatric", "active": true},
+    {"term": "neonatal", "active": true},
+    {"term": "infant", "active": true},
+    {"term": "pregnancy", "active": true},
+    {"term": "prenatal", "active": true},
+    {"term": "veterinary", "active": true},
+    {"term": "cosmetic", "active": true},
+    {"term": "skin aging", "active": true},
+    {"term": "photoaging", "active": true}
+  ],
+  "presets": [
+    {
+      "preset_name": "Attia Core",
+      "topics_csv": "Cardiovascular,Metabolism,Exercise,Sleep",
+      "exclusions_csv": "pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic",
+      "days_back": 7,
+      "max_results": 200
+    },
+    {
+      "preset_name": "Deep Dive - All Topics",
+      "topics_csv": "Cardiovascular,Metabolism,Exercise,Sleep,Neurodegeneration,Senolytics,mTOR & Rapamycin,Biomarkers & Clocks,Fasting & CR,NAD+ & Sirtuins,Metformin,Hormones & HRT,Cancer Screening,Bone Health,Supplements",
+      "exclusions_csv": "pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic,skin aging,photoaging",
+      "days_back": 14,
+      "max_results": 300
+    },
+    {
+      "preset_name": "Quick Scan",
+      "topics_csv": "Cardiovascular,Metabolism,Exercise",
+      "exclusions_csv": "pediatric,neonatal,infant,pregnancy,veterinary",
+      "days_back": 3,
+      "max_results": 100
+    },
+    {
+      "preset_name": "Interventions Focus",
+      "topics_csv": "mTOR & Rapamycin,Senolytics,Metformin,NAD+ & Sirtuins,Fasting & CR",
+      "exclusions_csv": "pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic",
+      "days_back": 7,
+      "max_results": 150
+    }
+  ]
+}

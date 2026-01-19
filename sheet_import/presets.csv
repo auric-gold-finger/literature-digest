@@ -1,0 +1,5 @@
+preset_name,topics_csv,exclusions_csv,days_back,max_results
+Attia Core,"Cardiovascular,Metabolism,Exercise,Sleep","pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic",7,200
+Deep Dive - All Topics,"Cardiovascular,Metabolism,Exercise,Sleep,Neurodegeneration,Senolytics,mTOR & Rapamycin,Biomarkers & Clocks,Fasting & CR,NAD+ & Sirtuins,Metformin,Hormones & HRT,Cancer Screening,Bone Health,Supplements","pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic,skin aging,photoaging",14,300
+Quick Scan,"Cardiovascular,Metabolism,Exercise","pediatric,neonatal,infant,pregnancy,veterinary",3,100
+Interventions Focus,"mTOR & Rapamycin,Senolytics,Metformin,NAD+ & Sirtuins,Fasting & CR","pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic",7,150

@@ -1,0 +1,16 @@
+name,query_fragment,active
+Cardiovascular,"""cardiovascular disease""[tiab] OR atherosclerosis[tiab] OR ""coronary artery disease""[tiab] OR ApoB[tiab] OR ""Lp(a)""[tiab] OR PCSK9[tiab] OR ""heart failure""[tiab]",TRUE
+Metabolism,"""insulin resistance""[tiab] OR hyperinsulinemia[tiab] OR ""metabolic syndrome""[tiab] OR ""GLP-1""[tiab] OR SGLT2[tiab] OR acarbose[tiab] OR ""glucose variability""[tiab] OR CGM[tiab]",TRUE
+Exercise,"exercise[tiab] OR ""physical activity""[tiab] OR ""resistance training""[tiab] OR HIIT[tiab] OR VO2[tiab] OR ""zone 2""[tiab] OR ""cardiorespiratory fitness""[tiab]",TRUE
+Sleep,"sleep[tiab] OR ""sleep apnea""[tiab] OR circadian[tiab] OR melatonin[tiab] OR CPAP[tiab] OR insomnia[tiab]",TRUE
+Neurodegeneration,"dementia[tiab] OR ""Alzheimer disease""[tiab] OR neurodegeneration[tiab] OR ""cognitive decline""[tiab] OR ""brain aging""[tiab]",TRUE
+Senolytics,"senolytic*[tiab] OR senescence[tiab] OR ""senescent cells""[tiab] OR dasatinib[tiab] OR quercetin[tiab] OR fisetin[tiab]",TRUE
+mTOR & Rapamycin,"rapamycin[tiab] OR ""mTOR""[tiab] OR sirolimus[tiab] OR everolimus[tiab]",TRUE
+Biomarkers & Clocks,"""epigenetic clock""[tiab] OR ""DNA methylation""[tiab] OR proteomic*[tiab] OR metabolomic*[tiab] OR biomarker*[tiab] OR ""biological age""[tiab]",TRUE
+Fasting & CR,"""caloric restriction""[tiab] OR ""intermittent fasting""[tiab] OR fasting[tiab] OR ""time-restricted eating""[tiab] OR autophagy[tiab]",TRUE
+NAD+ & Sirtuins,"NAD[tiab] OR NMN[tiab] OR ""nicotinamide riboside""[tiab] OR sirtuin*[tiab] OR SIRT1[tiab]",TRUE
+Metformin,metformin[tiab] OR AMPK[tiab],TRUE
+Hormones & HRT,"testosterone[tiab] OR ""hormone replacement""[tiab] OR estrogen[tiab] OR DHEA[tiab] OR ""growth hormone""[tiab]",TRUE
+Cancer Screening,"""cancer screening""[tiab] OR colonoscopy[tiab] OR ""liquid biopsy""[tiab] OR ""early detection""[tiab]",TRUE
+Bone Health,"osteoporosis[tiab] OR ""bone density""[tiab] OR ""bone mineral""[tiab] OR fracture[tiab]",TRUE
+Supplements,"spermidine[tiab] OR ""omega-3""[tiab] OR ""fish oil""[tiab] OR ""vitamin D""[tiab] OR creatine[tiab]",TRUE
