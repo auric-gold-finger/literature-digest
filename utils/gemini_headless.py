@@ -6,12 +6,11 @@ Batch triage scoring without Streamlit dependencies.
 
 import os
 import json
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from typing import List, Dict, Optional
 
 
-_client_cache = {}
+_model_cache = {}
 
 # Usage tracking
 _usage_stats = {
@@ -61,14 +60,15 @@ def _track_usage(response, call_type: str = "other"):
         pass  # Token tracking is best-effort
 
 
-def get_genai_client():
-    """Get Google GenAI client instance (cached)."""
-    if "client" not in _client_cache:
+def get_gemini_model(model_name: str = "gemini-2.5-pro"):
+    """Get Gemini model instance (cached)."""
+    if model_name not in _model_cache:
         api_key = os.environ.get("GEMINI_API_KEY", "")
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
-        _client_cache["client"] = genai.Client(api_key=api_key)
-    return _client_cache["client"]
+        genai.configure(api_key=api_key)
+        _model_cache[model_name] = genai.GenerativeModel(model_name)
+    return _model_cache[model_name]
 
 
 BATCH_TRIAGE_PROMPT = """You are an expert assistant for a longevity-focused research team (similar to Peter Attia's clinic).
@@ -134,7 +134,7 @@ def batch_triage_papers(
     Returns:
         Papers list with scores added. Blacklisted papers are removed.
     """
-    client = get_genai_client()
+    model = get_gemini_model("gemini-2.5-pro")
     
     whitelist = whitelist or []
     blacklist = blacklist or []
@@ -183,38 +183,16 @@ Altmetric Score: {altmetric_score}
         prompt = BATCH_TRIAGE_PROMPT + papers_text
         
         try:
-            response = client.models.generate_content(
-                model='gemini-2.5-pro',
-                contents=prompt,
-                config=types.GenerateContentConfig(
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
                     temperature=0.3,
                     max_output_tokens=1000
                 )
             )
             
             _track_usage(response, call_type="triage")
-            
-            # Debug: print response structure
-            print(f"  Response type: {type(response)}")
-            print(f"  Response candidates: {getattr(response, 'candidates', 'N/A')}")
-            
-            # Handle empty/None response - check candidates first
-            if hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                if hasattr(candidate, 'content') and candidate.content:
-                    parts = candidate.content.parts
-                    if parts:
-                        content = parts[0].text.strip()
-                    else:
-                        raise ValueError("No parts in response content")
-                else:
-                    # Check for safety/block reason
-                    finish_reason = getattr(candidate, 'finish_reason', None)
-                    raise ValueError(f"No content in candidate, finish_reason: {finish_reason}")
-            elif hasattr(response, 'text') and response.text:
-                content = response.text.strip()
-            else:
-                raise ValueError(f"Empty response from Gemini: {response}")
+            content = response.text.strip()
             
             # Parse JSON response
             if content.startswith("```"):
@@ -312,7 +290,7 @@ def summarize_paper(title: str, abstract: str) -> dict:
     
     Returns:
         Dict with keys: study_type, population, intervention_exposure, key_finding,
-                        clinical_magnitude, methodological_notes, bottom_line, why_selected
+                        clinical_magnitude, methodological_notes, bottom_line, why_selected, attia_take
         On failure, returns dict with fallback values using first sentence of abstract.
     """
     # Fallback: extract first sentence of abstract
@@ -335,27 +313,22 @@ def summarize_paper(title: str, abstract: str) -> dict:
         return get_fallback()
     
     try:
-        client = get_genai_client()
+        model = get_gemini_model("gemini-2.5-pro")
         
         prompt = SUMMARIZE_PROMPT.format(
             title=title,
             abstract=abstract[:3000]  # Allow longer abstracts for better context
         )
         
-        response = client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=prompt,
-            config=types.GenerateContentConfig(
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
                 temperature=0.3,  # Lower temp for more consistent critical analysis
                 max_output_tokens=1000  # More tokens for detailed appraisal
             )
         )
         
         _track_usage(response, call_type="summary")
-        
-        # Handle empty/None response
-        if not response.text:
-            raise ValueError("Empty response from Gemini")
         content = response.text.strip()
         
         # Parse JSON response (handle markdown code blocks)
@@ -456,24 +429,19 @@ def generate_digest_summary(papers: List[Dict]) -> Optional[str]:
     papers_summary = "\n\n".join(papers_summary_parts)
     
     try:
-        client = get_genai_client()
+        model = get_gemini_model("gemini-2.5-pro")
         
         prompt = DIGEST_SUMMARY_PROMPT.format(papers_summary=papers_summary)
         
-        response = client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=prompt,
-            config=types.GenerateContentConfig(
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
                 temperature=0.5,
                 max_output_tokens=200
             )
         )
         
         _track_usage(response, call_type="summary")
-        
-        # Handle empty/None response
-        if not response.text:
-            return None
         return response.text.strip()
         
     except Exception as e:
