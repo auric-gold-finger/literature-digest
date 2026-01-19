@@ -193,6 +193,10 @@ Altmetric Score: {altmetric_score}
             )
             
             _track_usage(response, call_type="triage")
+            
+            # Handle empty/None response
+            if not response.text:
+                raise ValueError("Empty response from Gemini")
             content = response.text.strip()
             
             # Parse JSON response
@@ -331,6 +335,10 @@ def summarize_paper(title: str, abstract: str) -> dict:
         )
         
         _track_usage(response, call_type="summary")
+        
+        # Handle empty/None response
+        if not response.text:
+            raise ValueError("Empty response from Gemini")
         content = response.text.strip()
         
         # Parse JSON response (handle markdown code blocks)
@@ -445,6 +453,10 @@ def generate_digest_summary(papers: List[Dict]) -> Optional[str]:
         )
         
         _track_usage(response, call_type="summary")
+        
+        # Handle empty/None response
+        if not response.text:
+            return None
         return response.text.strip()
         
     except Exception as e:

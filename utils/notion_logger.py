@@ -214,16 +214,20 @@ def check_duplicate(client: Client, database_id: str, pmid: str) -> bool:
     
     try:
         response = client.databases.query(
-            database_id=database_id,
-            filter={
-                "property": "PMID",
-                "rich_text": {
-                    "equals": pmid
+            **{
+                "database_id": database_id,
+                "filter": {
+                    "property": "PMID",
+                    "rich_text": {
+                        "equals": pmid
+                    }
                 }
             }
         )
-        return len(response.get("results", [])) > 0
-    except Exception:
+        results = response.get("results", []) if isinstance(response, dict) else getattr(response, 'results', [])
+        return len(results) > 0
+    except Exception as e:
+        print(f"Notion duplicate check failed: {e}")
         return False
 
 
@@ -278,17 +282,20 @@ def get_posted_pmids(days_back: int = 14) -> set:
         cutoff_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
         
         response = client.databases.query(
-            database_id=database_id,
-            filter={
-                "property": "Date Added",
-                "date": {
-                    "on_or_after": cutoff_date
+            **{
+                "database_id": database_id,
+                "filter": {
+                    "property": "Date Added",
+                    "date": {
+                        "on_or_after": cutoff_date
+                    }
                 }
             }
         )
         
         pmids = set()
-        for page in response.get("results", []):
+        results = response.get("results", []) if isinstance(response, dict) else getattr(response, 'results', [])
+        for page in results:
             pmid_prop = page.get("properties", {}).get("PMID", {})
             rich_text = pmid_prop.get("rich_text", [])
             if rich_text:
