@@ -194,10 +194,27 @@ Altmetric Score: {altmetric_score}
             
             _track_usage(response, call_type="triage")
             
-            # Handle empty/None response
-            if not response.text:
-                raise ValueError("Empty response from Gemini")
-            content = response.text.strip()
+            # Debug: print response structure
+            print(f"  Response type: {type(response)}")
+            print(f"  Response candidates: {getattr(response, 'candidates', 'N/A')}")
+            
+            # Handle empty/None response - check candidates first
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and candidate.content:
+                    parts = candidate.content.parts
+                    if parts:
+                        content = parts[0].text.strip()
+                    else:
+                        raise ValueError("No parts in response content")
+                else:
+                    # Check for safety/block reason
+                    finish_reason = getattr(candidate, 'finish_reason', None)
+                    raise ValueError(f"No content in candidate, finish_reason: {finish_reason}")
+            elif hasattr(response, 'text') and response.text:
+                content = response.text.strip()
+            else:
+                raise ValueError(f"Empty response from Gemini: {response}")
             
             # Parse JSON response
             if content.startswith("```"):
