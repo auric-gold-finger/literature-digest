@@ -175,19 +175,33 @@ Altmetric Score: {altmetric_score}
 
 # --- Paper Summarization ---
 
-SUMMARIZE_PROMPT = """You are a scientific analyst summarizing research for a longevity-focused medical team.
+SUMMARIZE_PROMPT = """You are Peter Attia, MD—a physician focused on the applied science of longevity. You think mechanistically, obsess over effect sizes, and refuse to accept statistical significance as a proxy for clinical relevance. You've read thousands of papers and have a finely tuned BS detector.
 
-Given a paper's title and abstract, provide a structured summary with these exact fields:
+Your job: appraise this paper the way you would on your podcast or in your newsletter. Be direct, skeptical, and precise. No hedging, no academic throat-clearing. If a study is garbage, say so. If it's legitimately important, explain why in concrete terms.
 
-1. **study_type**: The type of study (e.g., "RCT", "Meta-analysis", "Cohort study", "Cross-sectional", "Case-control", "Systematic review", "Animal study", "In vitro", "Case report", "Editorial/Opinion")
+Write in your voice: clear, conversational, occasionally wry. Use short sentences. Avoid jargon when plain language works. Think out loud about what this means for an actual patient sitting in front of you.
 
-2. **tldr**: A single sentence (max 25 words) capturing the key finding or conclusion.
+Given a paper's title and abstract, provide a structured appraisal with these exact fields:
 
-3. **key_points**: 1-2 bullet points of actionable or clinically meaningful findings. Each bullet should be a single sentence.
+1. **study_type**: Precise study design. Be specific—"Double-blind RCT" not just "RCT". Include sample size if it's notably large or small.
 
-4. **why_selected**: One sentence explaining why this paper matters for a longevity-focused clinician—what makes it worth reading (clinical relevance, novel finding, practice implications, etc.)
+2. **population**: Who was actually studied? Sample size, age, health status, how they were selected. Flag generalizability issues—most studies are done on WEIRD populations or sick hospitalized patients. Would these results apply to a 55-year-old trying to optimize healthspan?
 
-Return ONLY valid JSON with these exact keys: study_type, tldr, key_points (array), why_selected.
+3. **intervention_exposure**: What exactly was tested? Dose, duration, comparator. The details matter—a 12-week trial of 500mg metformin tells you almost nothing about long-term use at therapeutic doses.
+
+4. **key_finding**: The money shot. One sentence with the actual numbers—HR, OR, absolute risk reduction, mean difference. Include the confidence interval. If the abstract doesn't report effect sizes (a red flag), say so. Don't bury the lede.
+
+5. **clinical_magnitude**: Here's where you earn your keep. Is this effect size actually meaningful? A statistically significant 2% relative risk reduction is noise. Compare to known interventions when possible. What's the NNT? Would you change what you do in clinic based on this?
+
+6. **methodological_notes**: The fine print. Short follow-up? Surrogate endpoints? Residual confounding? Healthy user bias? Industry funding? Multiple comparisons? Call it out. If it's actually a well-designed study, say that too—good methodology deserves credit.
+
+7. **bottom_line**: What do you actually do with this information? Be prescriptive: "This changes nothing" or "Worth discussing with patients who X" or "Finally, good evidence for Y" or "Hypothesis only—needs an RCT." No wishy-washy "more research needed" unless you specify what research.
+
+8. **why_selected**: Why did this paper catch your attention? Novel mechanism? Challenges dogma? Large effect in rigorous design? Practice-changing potential? First human data on something interesting?
+
+Remember: most papers aren't worth reading. Your job is to figure out if this one is, and why.
+
+Return ONLY valid JSON with these exact keys: study_type, population, intervention_exposure, key_finding, clinical_magnitude, methodological_notes, bottom_line, why_selected.
 No markdown, no extra text, just the JSON object.
 
 Title: {title}
@@ -197,14 +211,15 @@ Abstract: {abstract}
 
 def summarize_paper(title: str, abstract: str) -> dict:
     """
-    Generate a structured summary of a paper using Gemini.
+    Generate a structured critical appraisal of a paper using Gemini.
     
     Args:
         title: Paper title
         abstract: Paper abstract
     
     Returns:
-        Dict with keys: study_type, tldr, key_points, why_selected
+        Dict with keys: study_type, population, intervention_exposure, key_finding,
+                        clinical_magnitude, methodological_notes, bottom_line, why_selected
         On failure, returns dict with fallback values using first sentence of abstract.
     """
     # Fallback: extract first sentence of abstract
@@ -214,8 +229,12 @@ def summarize_paper(title: str, abstract: str) -> dict:
             first_sentence += "."
         return {
             "study_type": "Study",
-            "tldr": first_sentence[:150] + ("..." if len(first_sentence) > 150 else ""),
-            "key_points": [],
+            "population": "See abstract for details.",
+            "intervention_exposure": "See abstract for details.",
+            "key_finding": first_sentence[:200] + ("..." if len(first_sentence) > 200 else ""),
+            "clinical_magnitude": "Unable to assess from available information.",
+            "methodological_notes": "Full appraisal requires review of complete paper.",
+            "bottom_line": "Review full text before drawing conclusions.",
             "why_selected": "Scored highly for relevance, evidence quality, and actionability."
         }
     
@@ -227,14 +246,14 @@ def summarize_paper(title: str, abstract: str) -> dict:
         
         prompt = SUMMARIZE_PROMPT.format(
             title=title,
-            abstract=abstract[:2000]  # Truncate very long abstracts
+            abstract=abstract[:3000]  # Allow longer abstracts for better context
         )
         
         response = model.generate_content(
             prompt,
             generation_config=genai.types.GenerationConfig(
-                temperature=0.4,
-                max_output_tokens=500
+                temperature=0.3,  # Lower temp for more consistent critical analysis
+                max_output_tokens=1000  # More tokens for detailed appraisal
             )
         )
         
@@ -249,13 +268,10 @@ def summarize_paper(title: str, abstract: str) -> dict:
         summary = json.loads(content)
         
         # Validate required fields
-        required = ["study_type", "tldr", "key_points", "why_selected"]
+        required = ["study_type", "population", "intervention_exposure", "key_finding", 
+                    "clinical_magnitude", "methodological_notes", "bottom_line", "why_selected"]
         if not all(k in summary for k in required):
             return get_fallback()
-        
-        # Ensure key_points is a list
-        if not isinstance(summary["key_points"], list):
-            summary["key_points"] = [summary["key_points"]] if summary["key_points"] else []
         
         return summary
         

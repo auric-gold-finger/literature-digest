@@ -45,7 +45,7 @@ def format_date(date_str: str) -> str:
 
 def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     """
-    Format a single paper as Slack Block Kit sections with clean typography.
+    Format a single paper as Slack Block Kit sections with critical appraisal.
     
     Args:
         paper: Paper dict with title, journal, authors, scores, url, summary, etc.
@@ -60,7 +60,6 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     url = paper.get("url", "")
     doi = paper.get("doi", "")
     pub_date = paper.get("pub_date", "")
-    pmid = paper.get("pmid", "")
     
     # Scores
     relevance = paper.get("triage_score", -1)
@@ -68,11 +67,15 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     actionability = paper.get("actionability_score", -1)
     altmetric = paper.get("altmetric", {}).get("score", 0)
     
-    # Summary (from AI)
+    # Summary (from AI critical appraisal)
     summary = paper.get("summary", {})
     study_type = summary.get("study_type", "")
-    tldr = summary.get("tldr", "")
-    key_points = summary.get("key_points", [])
+    population = summary.get("population", "")
+    intervention = summary.get("intervention_exposure", "")
+    key_finding = summary.get("key_finding", "")
+    clinical_magnitude = summary.get("clinical_magnitude", "")
+    methods_notes = summary.get("methodological_notes", "")
+    bottom_line = summary.get("bottom_line", "")
     why_selected = summary.get("why_selected", "")
     
     # Format date
@@ -98,25 +101,46 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     else:
         scores_line = "_Scores unavailable_"
     
-    # Build summary section
-    summary_lines = []
-    if study_type and tldr:
-        summary_lines.append(f"*{study_type}* — {tldr}")
-    elif tldr:
-        summary_lines.append(tldr)
+    # Build appraisal - prioritize readability
+    appraisal_lines = []
     
-    for point in key_points[:2]:  # Max 2 bullet points
-        summary_lines.append(f"→ {point}")
+    # Study type as a clean tag
+    if study_type:
+        appraisal_lines.append(study_type.upper())
+        appraisal_lines.append("")
     
+    # Key finding first - this is what readers want
+    if key_finding:
+        appraisal_lines.append(key_finding)
+        appraisal_lines.append("")
+    
+    # Context paragraph: magnitude + population + methods (condensed)
+    context_parts = []
+    if clinical_magnitude:
+        context_parts.append(clinical_magnitude)
+    if population:
+        context_parts.append(population)
+    if methods_notes:
+        context_parts.append(methods_notes)
+    
+    if context_parts:
+        appraisal_lines.append(" ".join(context_parts))
+        appraisal_lines.append("")
+    
+    # Bottom line stands out
+    if bottom_line:
+        appraisal_lines.append(f"*{bottom_line}*")
+        appraisal_lines.append("")
+    
+    # Why selected - italicized context
     if why_selected:
-        summary_lines.append(f"\n_Why selected: {why_selected}_")
+        appraisal_lines.append(f"_Selected: {why_selected}_")
     
-    summary_text = "\n".join(summary_lines) if summary_lines else ""
+    appraisal_text = "\n".join(appraisal_lines).strip()
     
-    # Truncate authors if too long
-    if len(authors) > 100:
-        authors = authors[:97] + "..."
-    authors_line = f"― {authors}"
+    # Truncate authors
+    if len(authors) > 80:
+        authors = authors[:77] + "..."
     
     # Combine all parts
     text_parts = [
@@ -125,12 +149,12 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
         scores_line,
     ]
     
-    if summary_text:
-        text_parts.append("")  # Blank line
-        text_parts.append(summary_text)
+    if appraisal_text:
+        text_parts.append("")
+        text_parts.append(appraisal_text)
     
-    text_parts.append("")  # Blank line before authors
-    text_parts.append(authors_line)
+    text_parts.append("")
+    text_parts.append(f"― _{authors}_")
     
     return {
         "type": "section",
