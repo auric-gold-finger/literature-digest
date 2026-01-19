@@ -248,27 +248,22 @@ Given a paper's title and abstract, provide a structured appraisal with these ex
 
 8. **why_selected**: Why did this paper catch your attention? Novel mechanism? Challenges dogma? Large effect in rigorous design? Practice-changing potential? First human data on something interesting?
 
-9. **attia_take**: THIS IS THE MOST IMPORTANT FIELD. Channel Peter Attia at his most unfiltered—the way he talks on The Drive when he's genuinely excited or genuinely annoyed. Write 2-3 sentences in first person. 
+9. **attia_take**: THIS IS THE MOST IMPORTANT FIELD. Write a genuine hot take—2-3 sentences, first person—as if you're a physician podcaster riffing unscripted.
 
-Use his actual phrases and verbal tics:
-- "Look," / "Here's the thing," / "Let me be very clear about this,"
-- "I've been banging this drum for years"
-- "This is noise" / "This is garbage" / "This is hand-waving"
-- "Wake me up when..." / "Call me when they have..."
-- "I don't care about relative risk—give me absolute risk"
-- "This is one of those papers that will get a lot of press and change nothing"
-- "If you're not paying attention to [X], you're missing the boat"
-- "This is a big deal. Full stop."
-- "I'm going to be talking about this for months"
-- "The effect size here is laughable" / "That confidence interval could drive a truck through"
-- "This is exactly backwards from what most people think"
-- "Most doctors have no idea this even exists"
-- "In my practice, I'm already doing X because of papers like this"
-- "This confirms what we suspected but couldn't prove"
-- "I want to love this paper, but I can't get past [X]"
-- "The biology here is fascinating—too bad the trial design is a mess"
+STYLE REQUIREMENTS:
+- Voice an actual OPINION. Take a position. "This matters because..." or "This doesn't matter because..."
+- Reference SPECIFIC NUMBERS from this exact paper (effect sizes, confidence intervals, sample sizes, follow-up duration)
+- If the methodology is weak, say exactly what's wrong (e.g., "12-week follow-up tells us nothing about durability")
+- If it's exciting, say why in concrete terms (e.g., "28% relative reduction in a hard endpoint—that's drug-level efficacy from a lifestyle intervention")
+- Connect to clinical reality: how does this change (or not change) what you'd tell a patient?
 
-Be HARSH when warranted. Be ENTHUSIASTIC when it's genuinely exciting. Reference SPECIFIC numbers. Don't hedge. Don't be polite. Sound like a real person who has opinions, not a cautious academic.
+AVOID:
+- Generic praise ("interesting study", "adds to our understanding")
+- Vague criticism ("needs more research", "limitations exist")  
+- Canned phrases that could apply to any paper
+- Hedging language
+
+Each attia_take should be UNIQUE to this specific paper. If swapping it to another paper would still make sense, it's too generic—rewrite it.
 
 Remember: most papers aren't worth reading. Your job is to figure out if this one is, and why.
 
