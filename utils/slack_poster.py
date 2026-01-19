@@ -130,7 +130,7 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     
     # Attia's Take - the opinionated podcast-style commentary (prominent placement)
     if attia_take:
-        appraisal_lines.append(f"💬 _{attia_take}_")
+        appraisal_lines.append(f"*PA:* _{attia_take}_")
         appraisal_lines.append("")
     
     # Context paragraph: magnitude + population + methods (condensed)
