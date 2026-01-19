@@ -60,25 +60,28 @@ def get_webhook_url() -> str:
 
 def format_date(date_str: str) -> str:
     """
-    Format date string to readable format (e.g., 'Jan 2026').
+    Format date string to readable format (e.g., 'Jan 15, 2026').
     
     Args:
         date_str: Date in YYYY-MM-DD or YYYY/MM/DD format
     
     Returns:
-        Formatted date string like 'Jan 2026'
+        Formatted date string like 'Jan 15, 2026'
     """
     if not date_str:
         return ""
     try:
         # Handle various date formats
-        for fmt in ["%Y-%m-%d", "%Y/%m/%d", "%Y"]:
+        for fmt in ["%Y-%m-%d", "%Y/%m/%d"]:
             try:
                 dt = datetime.strptime(date_str[:10], fmt)
-                return dt.strftime("%b %Y")
+                return dt.strftime("%b %d, %Y")
             except ValueError:
                 continue
-        return date_str[:7]  # Fallback to YYYY-MM
+        # Year only fallback
+        if len(date_str) == 4:
+            return date_str
+        return date_str[:10]  # Fallback to raw date
     except Exception:
         return ""
 
