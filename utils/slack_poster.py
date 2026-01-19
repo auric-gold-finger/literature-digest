@@ -80,6 +80,7 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     methods_notes = summary.get("methodological_notes", "")
     bottom_line = summary.get("bottom_line", "")
     why_selected = summary.get("why_selected", "")
+    attia_take = summary.get("attia_take", "")
     
     # Format date
     date_display = format_date(pub_date)
@@ -127,6 +128,11 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
         appraisal_lines.append(key_finding)
         appraisal_lines.append("")
     
+    # Attia's Take - the opinionated podcast-style commentary (prominent placement)
+    if attia_take:
+        appraisal_lines.append(f"💬 _{attia_take}_")
+        appraisal_lines.append("")
+    
     # Context paragraph: magnitude + population + methods (condensed)
     context_parts = []
     if clinical_magnitude:
@@ -143,11 +149,6 @@ def format_paper_block(paper: Dict, rank: int) -> List[Dict]:
     # Bottom line stands out
     if bottom_line:
         appraisal_lines.append(f"*{bottom_line}*")
-        appraisal_lines.append("")
-    
-    # Why selected - italicized context
-    if why_selected:
-        appraisal_lines.append(f"_Selected: {why_selected}_")
     
     appraisal_text = "\n".join(appraisal_lines).strip()
     

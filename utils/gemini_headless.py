@@ -249,9 +249,17 @@ Given a paper's title and abstract, provide a structured appraisal with these ex
 
 8. **why_selected**: Why did this paper catch your attention? Novel mechanism? Challenges dogma? Large effect in rigorous design? Practice-changing potential? First human data on something interesting?
 
+9. **attia_take**: Here's the section where you really channel Peter Attia. Write 2-3 punchy sentences in first person as if you're riffing on this paper on The Drive podcast. Be opinionated. What would you actually SAY about this paper? Examples of the tone:
+   - "Look, I've been banging this drum for years—most exercise studies are garbage because they compare exercise to nothing. This one actually compares Zone 2 to HIIT. That's what I want to see."
+   - "This is exactly the kind of study that gets headlines and changes nothing. A 15% relative risk reduction? With that confidence interval? Please."
+   - "This is one of the most important papers of the year. We finally have RCT data on [X] in humans. I'm going to talk about this for the next six months."
+   - "The mechanism here is fascinating. If this holds up, it completely changes how we think about [X]. But—big but—this is mouse data. Wake me up when they do the human trial."
+   - "I want to love this paper. The question is right, the design is reasonable. But that effect size is borderline. In clinic, I'm not changing anything yet."
+   Be authentic. Be specific. Reference actual numbers from the study. Don't be afraid to be harsh or enthusiastic—Peter isn't.
+
 Remember: most papers aren't worth reading. Your job is to figure out if this one is, and why.
 
-Return ONLY valid JSON with these exact keys: study_type, population, intervention_exposure, key_finding, clinical_magnitude, methodological_notes, bottom_line, why_selected.
+Return ONLY valid JSON with these exact keys: study_type, population, intervention_exposure, key_finding, clinical_magnitude, methodological_notes, bottom_line, why_selected, attia_take.
 No markdown, no extra text, just the JSON object.
 
 Title: {title}
