@@ -542,14 +542,17 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     
     # Line 1: Emoji + Title + Journal (compact header)
     lines.append(f"{emoji} *{rank}. <{url}|{title}>*  —  _{journal}_")
+    lines.append("")  # blank line after header
     
     # Line 2: Bottom line (the actionable takeaway)
     if bottom_line:
         lines.append(f"*{bottom_line}*")
+        lines.append("")  # blank line after bottom line
     
     # Line 3: Hot take (the opinion/commentary)
     if attia_take:
         lines.append(f"_{attia_take}_")
+        lines.append("")  # blank line after hot take
     
     # Line 4: Links (minimal)
     links = []
@@ -562,7 +565,7 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     if links:
         lines.append(" · ".join(links))
     
-    # Build payload
+    # Build payload with divider for visual separation between messages
     payload = {
         "blocks": [
             {
@@ -571,7 +574,8 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
                     "type": "mrkdwn",
                     "text": "\n".join(lines)
                 }
-            }
+            },
+            {"type": "divider"}
         ]
     }
     
