@@ -74,27 +74,108 @@
       "name": "Supplements",
       "query_fragment": "spermidine[tiab] OR \"omega-3\"[tiab] OR \"fish oil\"[tiab] OR \"vitamin D\"[tiab] OR creatine[tiab]",
       "active": true
+    },
+    {
+      "name": "ITP Results",
+      "query_fragment": "\"Interventions Testing Program\"[tiab] OR (\"ITP\"[tiab] AND (aging[tiab] OR lifespan[tiab] OR longevity[tiab])) OR \"NIA ITP\"[tiab]",
+      "active": true,
+      "priority": "always"
+    },
+    {
+      "name": "Mitochondria",
+      "query_fragment": "mitochondri*[tiab] OR \"mitochondrial biogenesis\"[tiab] OR PGC-1alpha[tiab] OR \"mitochondrial dysfunction\"[tiab] OR mitophagy[tiab]",
+      "active": true
+    },
+    {
+      "name": "Telomeres",
+      "query_fragment": "telomer*[tiab] OR telomerase[tiab] OR \"telomere length\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Klotho",
+      "query_fragment": "klotho[tiab] OR \"alpha-klotho\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Reprogramming",
+      "query_fragment": "\"partial reprogramming\"[tiab] OR \"cellular reprogramming\"[tiab] OR Yamanaka[tiab] OR \"epigenetic reprogramming\"[tiab] OR \"OSK factors\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Tirzepatide & GIP",
+      "query_fragment": "tirzepatide[tiab] OR retatrutide[tiab] OR \"dual GIP/GLP-1\"[tiab] OR \"triple agonist\"[tiab] OR \"GIP agonist\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Parabiosis",
+      "query_fragment": "\"young blood\"[tiab] OR parabiosis[tiab] OR \"plasma exchange\"[tiab] OR \"plasma dilution\"[tiab] OR heterochronic[tiab]",
+      "active": true
+    },
+    {
+      "name": "Heat & Cold Stress",
+      "query_fragment": "\"heat shock\"[tiab] OR sauna[tiab] OR \"cold exposure\"[tiab] OR \"cold shock\"[tiab] OR thermogenesis[tiab] OR \"brown adipose\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Glycine & Taurine",
+      "query_fragment": "(glycine[tiab] OR taurine[tiab]) AND (aging[tiab] OR longevity[tiab] OR lifespan[tiab])",
+      "active": true
+    },
+    {
+      "name": "Alpha-ketoglutarate",
+      "query_fragment": "\"alpha-ketoglutarate\"[tiab] OR (AKG[tiab] AND aging[tiab])",
+      "active": true
+    },
+    {
+      "name": "FOXO",
+      "query_fragment": "(FOXO[tiab] OR FOXO3[tiab]) AND (longevity[tiab] OR aging[tiab])",
+      "active": true
     }
   ],
   "authors_whitelist": [
-    {"author_name": "Kaeberlein M", "active": true},
-    {"author_name": "Barzilai N", "active": true},
-    {"author_name": "Sinclair DA", "active": true},
-    {"author_name": "Longo VD", "active": true},
-    {"author_name": "Fontana L", "active": true},
-    {"author_name": "Verdin E", "active": true},
-    {"author_name": "Kennedy BK", "active": true},
-    {"author_name": "Campisi J", "active": true},
-    {"author_name": "Lopez-Otin C", "active": true},
-    {"author_name": "Bhatt DL", "active": true},
-    {"author_name": "Ioannidis JPA", "active": true},
-    {"author_name": "Krauss RM", "active": true},
-    {"author_name": "Sniderman AD", "active": true},
-    {"author_name": "Ridker PM", "active": true},
-    {"author_name": "Sattar N", "active": true},
-    {"author_name": "de Cabo R", "active": true},
-    {"author_name": "Mannick JB", "active": true},
-    {"author_name": "Partridge L", "active": true}
+    {"author_name": "Kaeberlein M", "active": true, "category": "longevity"},
+    {"author_name": "Barzilai N", "active": true, "category": "longevity"},
+    {"author_name": "Sinclair DA", "active": true, "category": "longevity"},
+    {"author_name": "Longo VD", "active": true, "category": "longevity"},
+    {"author_name": "Fontana L", "active": true, "category": "longevity"},
+    {"author_name": "Verdin E", "active": true, "category": "longevity"},
+    {"author_name": "Kennedy BK", "active": true, "category": "longevity"},
+    {"author_name": "Campisi J", "active": true, "category": "longevity"},
+    {"author_name": "Lopez-Otin C", "active": true, "category": "longevity"},
+    {"author_name": "Bhatt DL", "active": true, "category": "cardio"},
+    {"author_name": "Ioannidis JPA", "active": true, "category": "methods"},
+    {"author_name": "Krauss RM", "active": true, "category": "lipids"},
+    {"author_name": "Sniderman AD", "active": true, "category": "lipids"},
+    {"author_name": "Ridker PM", "active": true, "category": "cardio"},
+    {"author_name": "Sattar N", "active": true, "category": "metabolism"},
+    {"author_name": "de Cabo R", "active": true, "category": "longevity"},
+    {"author_name": "Mannick JB", "active": true, "category": "longevity"},
+    {"author_name": "Partridge L", "active": true, "category": "longevity"},
+    {"author_name": "Horvath S", "active": true, "category": "clocks"},
+    {"author_name": "Levine ME", "active": true, "category": "clocks"},
+    {"author_name": "Lu Y", "active": true, "category": "reprogramming"},
+    {"author_name": "Conboy IM", "active": true, "category": "parabiosis"},
+    {"author_name": "Conboy MJ", "active": true, "category": "parabiosis"},
+    {"author_name": "Kirkland JL", "active": true, "category": "senolytics"},
+    {"author_name": "Tchkonia T", "active": true, "category": "senolytics"},
+    {"author_name": "Belsky DW", "active": true, "category": "clocks"},
+    {"author_name": "Sierra F", "active": true, "category": "longevity"},
+    {"author_name": "Newman JC", "active": true, "category": "longevity"},
+    {"author_name": "Miller RA", "active": true, "category": "itp"},
+    {"author_name": "Strong R", "active": true, "category": "itp"},
+    {"author_name": "Harrison DE", "active": true, "category": "itp"},
+    {"author_name": "Nadon NL", "active": true, "category": "itp"},
+    {"author_name": "Niedernhofer LJ", "active": true, "category": "senolytics"},
+    {"author_name": "Robbins PD", "active": true, "category": "senolytics"},
+    {"author_name": "Mair W", "active": true, "category": "longevity"},
+    {"author_name": "Sabatini DM", "active": true, "category": "mtor"},
+    {"author_name": "Lamming DW", "active": true, "category": "mtor"},
+    {"author_name": "Guarente L", "active": true, "category": "sirtuins"},
+    {"author_name": "Austad SN", "active": true, "category": "longevity"},
+    {"author_name": "Vijg J", "active": true, "category": "longevity"},
+    {"author_name": "Jasper H", "active": true, "category": "longevity"},
+    {"author_name": "Drucker DJ", "active": true, "category": "glp1"},
+    {"author_name": "Nauck MA", "active": true, "category": "glp1"}
   ],
   "authors_blacklist": [],
   "exclusions": [
@@ -108,6 +189,22 @@
     {"term": "skin aging", "active": true},
     {"term": "photoaging", "active": true}
   ],
+  "digest_config": {
+    "daily": {
+      "days_back": 7,
+      "max_results": 200,
+      "top_n_papers": 5,
+      "min_combined_score": 15
+    },
+    "frontier": {
+      "days_back": 14,
+      "max_pubmed_results": 300,
+      "max_preprint_results": 50,
+      "top_n_papers": 7,
+      "min_combined_score": 12,
+      "min_frontier_score": 6
+    }
+  },
   "presets": [
     {
       "preset_name": "Attia Core",
@@ -118,7 +215,7 @@
     },
     {
       "preset_name": "Deep Dive - All Topics",
-      "topics_csv": "Cardiovascular,Metabolism,Exercise,Sleep,Neurodegeneration,Senolytics,mTOR & Rapamycin,Biomarkers & Clocks,Fasting & CR,NAD+ & Sirtuins,Metformin,Hormones & HRT,Cancer Screening,Bone Health,Supplements",
+      "topics_csv": "Cardiovascular,Metabolism,Exercise,Sleep,Neurodegeneration,Senolytics,mTOR & Rapamycin,Biomarkers & Clocks,Fasting & CR,NAD+ & Sirtuins,Metformin,Hormones & HRT,Cancer Screening,Bone Health,Supplements,ITP Results,Mitochondria,Telomeres,Klotho,Reprogramming,Tirzepatide & GIP,Parabiosis,Heat & Cold Stress",
       "exclusions_csv": "pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic,skin aging,photoaging",
       "days_back": 14,
       "max_results": 300
@@ -132,10 +229,17 @@
     },
     {
       "preset_name": "Interventions Focus",
-      "topics_csv": "mTOR & Rapamycin,Senolytics,Metformin,NAD+ & Sirtuins,Fasting & CR",
+      "topics_csv": "mTOR & Rapamycin,Senolytics,Metformin,NAD+ & Sirtuins,Fasting & CR,ITP Results",
       "exclusions_csv": "pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic",
       "days_back": 7,
       "max_results": 150
+    },
+    {
+      "preset_name": "Frontier Science",
+      "topics_csv": "Reprogramming,Parabiosis,Klotho,Senolytics,ITP Results,Mitochondria,Telomeres",
+      "exclusions_csv": "pediatric,neonatal,infant,pregnancy,prenatal,veterinary,cosmetic",
+      "days_back": 14,
+      "max_results": 200
     }
   ]
 }

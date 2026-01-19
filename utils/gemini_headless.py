@@ -80,7 +80,7 @@ def get_gemini_model(model_name: str = None):
 
 BATCH_TRIAGE_PROMPT = """You are an expert assistant for a longevity-focused research team (similar to Peter Attia's clinic).
 
-Given a batch of research papers (title, abstract, altmetric score), score each paper on THREE dimensions:
+Given a batch of research papers (title, abstract, altmetric score), score each paper on FOUR dimensions:
 
 1. **Relevance Score (0-10)**: How important is this paper for longevity, healthspan, or clinical decision-making?
    - 9-10: Directly addresses core longevity topics (cardiovascular, metabolism, exercise, sleep, neurodegeneration, cancer)
@@ -101,11 +101,19 @@ Given a batch of research papers (title, abstract, altmetric score), score each 
    - 5-6: Useful for patient counseling or future consideration
    - 0-4: Basic science, requires more research, no clinical application yet
 
+4. **Frontier Score (0-10)**: How paradigm-shifting or cutting-edge is this research? (For bleeding-edge longevity science)
+   - 9-10: Could fundamentally change aging intervention if validated; novel mechanism; first human data on promising preclinical target
+   - 7-8: Novel approach, first rigorous data in emerging area, challenges current dogma
+   - 5-6: Meaningful extension of known findings, good validation study
+   - 0-4: Incremental, confirmatory, or well-established finding
+   - NOTE: A mouse study showing 20% lifespan extension should score HIGH here even if evidence score is low
+
 Return a JSON array with objects containing:
 - "index": the paper's index from the input (0-based)
 - "relevance": relevance score (integer 0-10)
 - "evidence": evidence quality score (integer 0-10)
 - "actionability": actionability score (integer 0-10)
+- "frontier": frontier score (integer 0-10)
 
 Return ONLY the JSON array, no other text.
 
@@ -162,6 +170,7 @@ def batch_triage_papers(
         paper["triage_score"] = -1
         paper["evidence_score"] = -1
         paper["actionability_score"] = -1
+        paper["frontier_score"] = -1
         paper["whitelisted"] = _author_in_list(paper.get("authors", ""), whitelist)
     
     # Process in batches
@@ -216,6 +225,7 @@ Altmetric Score: {altmetric_score}
                     batch[idx]["triage_score"] = score_obj.get("relevance", -1)
                     batch[idx]["evidence_score"] = score_obj.get("evidence", -1)
                     batch[idx]["actionability_score"] = score_obj.get("actionability", -1)
+                    batch[idx]["frontier_score"] = score_obj.get("frontier", -1)
                     
         except Exception as e:
             _usage_stats["errors"] += 1

@@ -1,0 +1,53 @@
+name: Weekly Frontier Digest
+
+on:
+  # Run weekly on Sundays at 6 AM ET (11 AM UTC)
+  schedule:
+    - cron: '0 11 * * 0'
+  
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  run-frontier-digest:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run frontier digest
+        env:
+          # PubMed
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+          
+          # Gemini AI
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          
+          # Slack
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          
+          # Notion
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          
+          # Optional: Google Sheets config
+          GSHEET_CONFIG_ID: ${{ secrets.GSHEET_CONFIG_ID }}
+          GSHEET_TAB_TOPICS: ${{ secrets.GSHEET_TAB_TOPICS }}
+          GSHEET_TAB_WHITELIST: ${{ secrets.GSHEET_TAB_WHITELIST }}
+          GSHEET_TAB_BLACKLIST: ${{ secrets.GSHEET_TAB_BLACKLIST }}
+          GSHEET_TAB_EXCLUSIONS: ${{ secrets.GSHEET_TAB_EXCLUSIONS }}
+          GSHEET_TAB_PRESETS: ${{ secrets.GSHEET_TAB_PRESETS }}
+        
+        run: python frontier_digest.py

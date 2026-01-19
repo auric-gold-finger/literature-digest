@@ -1,16 +1,27 @@
-name,query_fragment,active
-Cardiovascular,"""cardiovascular disease""[tiab] OR atherosclerosis[tiab] OR ""coronary artery disease""[tiab] OR ApoB[tiab] OR ""Lp(a)""[tiab] OR PCSK9[tiab] OR ""heart failure""[tiab]",TRUE
-Metabolism,"""insulin resistance""[tiab] OR hyperinsulinemia[tiab] OR ""metabolic syndrome""[tiab] OR ""GLP-1""[tiab] OR SGLT2[tiab] OR acarbose[tiab] OR ""glucose variability""[tiab] OR CGM[tiab]",TRUE
-Exercise,"exercise[tiab] OR ""physical activity""[tiab] OR ""resistance training""[tiab] OR HIIT[tiab] OR VO2[tiab] OR ""zone 2""[tiab] OR ""cardiorespiratory fitness""[tiab]",TRUE
-Sleep,"sleep[tiab] OR ""sleep apnea""[tiab] OR circadian[tiab] OR melatonin[tiab] OR CPAP[tiab] OR insomnia[tiab]",TRUE
-Neurodegeneration,"dementia[tiab] OR ""Alzheimer disease""[tiab] OR neurodegeneration[tiab] OR ""cognitive decline""[tiab] OR ""brain aging""[tiab]",TRUE
-Senolytics,"senolytic*[tiab] OR senescence[tiab] OR ""senescent cells""[tiab] OR dasatinib[tiab] OR quercetin[tiab] OR fisetin[tiab]",TRUE
-mTOR & Rapamycin,"rapamycin[tiab] OR ""mTOR""[tiab] OR sirolimus[tiab] OR everolimus[tiab]",TRUE
-Biomarkers & Clocks,"""epigenetic clock""[tiab] OR ""DNA methylation""[tiab] OR proteomic*[tiab] OR metabolomic*[tiab] OR biomarker*[tiab] OR ""biological age""[tiab]",TRUE
-Fasting & CR,"""caloric restriction""[tiab] OR ""intermittent fasting""[tiab] OR fasting[tiab] OR ""time-restricted eating""[tiab] OR autophagy[tiab]",TRUE
-NAD+ & Sirtuins,"NAD[tiab] OR NMN[tiab] OR ""nicotinamide riboside""[tiab] OR sirtuin*[tiab] OR SIRT1[tiab]",TRUE
-Metformin,metformin[tiab] OR AMPK[tiab],TRUE
-Hormones & HRT,"testosterone[tiab] OR ""hormone replacement""[tiab] OR estrogen[tiab] OR DHEA[tiab] OR ""growth hormone""[tiab]",TRUE
-Cancer Screening,"""cancer screening""[tiab] OR colonoscopy[tiab] OR ""liquid biopsy""[tiab] OR ""early detection""[tiab]",TRUE
-Bone Health,"osteoporosis[tiab] OR ""bone density""[tiab] OR ""bone mineral""[tiab] OR fracture[tiab]",TRUE
-Supplements,"spermidine[tiab] OR ""omega-3""[tiab] OR ""fish oil""[tiab] OR ""vitamin D""[tiab] OR creatine[tiab]",TRUE
+name,query_fragment,active,priority
+Cardiovascular,"""cardiovascular disease""[tiab] OR atherosclerosis[tiab] OR ""coronary artery disease""[tiab] OR ApoB[tiab] OR ""Lp(a)""[tiab] OR PCSK9[tiab] OR ""heart failure""[tiab]",TRUE,normal
+Metabolism,"""insulin resistance""[tiab] OR hyperinsulinemia[tiab] OR ""metabolic syndrome""[tiab] OR ""GLP-1""[tiab] OR SGLT2[tiab] OR acarbose[tiab] OR ""glucose variability""[tiab] OR CGM[tiab]",TRUE,normal
+Exercise,"exercise[tiab] OR ""physical activity""[tiab] OR ""resistance training""[tiab] OR HIIT[tiab] OR VO2[tiab] OR ""zone 2""[tiab] OR ""cardiorespiratory fitness""[tiab]",TRUE,normal
+Sleep,"sleep[tiab] OR ""sleep apnea""[tiab] OR circadian[tiab] OR melatonin[tiab] OR CPAP[tiab] OR insomnia[tiab]",TRUE,normal
+Neurodegeneration,"dementia[tiab] OR ""Alzheimer disease""[tiab] OR neurodegeneration[tiab] OR ""cognitive decline""[tiab] OR ""brain aging""[tiab]",TRUE,normal
+Senolytics,"senolytic*[tiab] OR senescence[tiab] OR ""senescent cells""[tiab] OR dasatinib[tiab] OR quercetin[tiab] OR fisetin[tiab]",TRUE,normal
+mTOR & Rapamycin,"rapamycin[tiab] OR ""mTOR""[tiab] OR sirolimus[tiab] OR everolimus[tiab]",TRUE,normal
+Biomarkers & Clocks,"""epigenetic clock""[tiab] OR ""DNA methylation""[tiab] OR proteomic*[tiab] OR metabolomic*[tiab] OR biomarker*[tiab] OR ""biological age""[tiab]",TRUE,normal
+Fasting & CR,"""caloric restriction""[tiab] OR ""intermittent fasting""[tiab] OR fasting[tiab] OR ""time-restricted eating""[tiab] OR autophagy[tiab]",TRUE,normal
+NAD+ & Sirtuins,"NAD[tiab] OR NMN[tiab] OR ""nicotinamide riboside""[tiab] OR sirtuin*[tiab] OR SIRT1[tiab]",TRUE,normal
+Metformin,metformin[tiab] OR AMPK[tiab],TRUE,normal
+Hormones & HRT,"testosterone[tiab] OR ""hormone replacement""[tiab] OR estrogen[tiab] OR DHEA[tiab] OR ""growth hormone""[tiab]",TRUE,normal
+Cancer Screening,"""cancer screening""[tiab] OR colonoscopy[tiab] OR ""liquid biopsy""[tiab] OR ""early detection""[tiab]",TRUE,normal
+Bone Health,"osteoporosis[tiab] OR ""bone density""[tiab] OR ""bone mineral""[tiab] OR fracture[tiab]",TRUE,normal
+Supplements,"spermidine[tiab] OR ""omega-3""[tiab] OR ""fish oil""[tiab] OR ""vitamin D""[tiab] OR creatine[tiab]",TRUE,normal
+ITP Results,"""Interventions Testing Program""[tiab] OR ""ITP""[tiab] AND (aging[tiab] OR lifespan[tiab] OR longevity[tiab]) OR ""NIA ITP""[tiab]",TRUE,always
+Mitochondria,"mitochondri*[tiab] OR ""mitochondrial biogenesis""[tiab] OR PGC-1alpha[tiab] OR ""mitochondrial dysfunction""[tiab] OR mitophagy[tiab]",TRUE,normal
+Telomeres,"telomer*[tiab] OR telomerase[tiab] OR ""telomere length""[tiab]",TRUE,normal
+Klotho,"klotho[tiab] OR ""alpha-klotho""[tiab]",TRUE,normal
+Reprogramming,"""partial reprogramming""[tiab] OR ""cellular reprogramming""[tiab] OR Yamanaka[tiab] OR ""epigenetic reprogramming""[tiab] OR ""OSK factors""[tiab]",TRUE,normal
+Tirzepatide & GIP,"""tirzepatide""[tiab] OR ""retatrutide""[tiab] OR ""dual GIP/GLP-1""[tiab] OR ""triple agonist""[tiab] OR ""GIP agonist""[tiab]",TRUE,normal
+Parabiosis,"""young blood""[tiab] OR ""parabiosis""[tiab] OR ""plasma exchange""[tiab] OR ""plasma dilution""[tiab] OR ""heterochronic""[tiab]",TRUE,normal
+Heat & Cold Stress,"""heat shock""[tiab] OR sauna[tiab] OR ""cold exposure""[tiab] OR ""cold shock""[tiab] OR thermogenesis[tiab] OR ""brown adipose""[tiab]",TRUE,normal
+Glycine & Taurine,"(glycine[tiab] OR taurine[tiab]) AND (aging[tiab] OR longevity[tiab] OR lifespan[tiab])",TRUE,normal
+Alpha-ketoglutarate,"""alpha-ketoglutarate""[tiab] OR ""AKG""[tiab] AND aging[tiab]",TRUE,normal
+FOXO,"FOXO[tiab] OR ""FOXO3""[tiab] AND (longevity[tiab] OR aging[tiab])",TRUE,normal

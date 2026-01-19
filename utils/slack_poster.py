@@ -376,17 +376,25 @@ def post_error(error_message: str, context: Optional[str] = None) -> bool:
         return False
 
 
-def post_no_papers_message(days: int = 7) -> bool:
+def post_no_papers_message(days: int = 7, digest_type: str = "daily") -> bool:
     """
     Post message when no papers meet the threshold.
     
     Args:
         days: Number of days the search covered
+        digest_type: "daily" or "frontier"
     
     Returns:
         True if successful, False otherwise
     """
     webhook_url = get_webhook_url()
+    
+    if digest_type == "frontier":
+        header_text = "🔬 Frontier Digest"
+        message = f"No frontier papers from the past {days} days met the scoring threshold this week."
+    else:
+        header_text = "Literature Digest"
+        message = f"No papers from the past {days} days met the scoring threshold today."
     
     payload = {
         "blocks": [
@@ -394,15 +402,15 @@ def post_no_papers_message(days: int = 7) -> bool:
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": "Literature Digest",
-                    "emoji": False
+                    "text": header_text,
+                    "emoji": True
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"No papers from the past {days} days met the scoring threshold today."
+                    "text": message
                 }
             }
         ]
@@ -650,6 +658,268 @@ def post_digest_multi(
             print(f"  Posting paper {i}/{len(papers)}...")
         
         if not post_single_paper(paper, i):
+            all_success = False
+    
+    return all_success
+
+
+# --- Frontier Digest Posting Functions ---
+
+def post_frontier_header(
+    paper_count: int,
+    summary_text: Optional[str] = None,
+    usage_stats: Optional[Dict] = None
+) -> bool:
+    """
+    Post the frontier digest header with distinctive styling.
+    
+    Args:
+        paper_count: Number of papers in this week's frontier digest
+        summary_text: AI-generated summary
+        usage_stats: Optional API usage statistics
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    webhook_url = get_webhook_url()
+    
+    today = datetime.now().strftime("%B %d, %Y")
+    
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "🔬 Frontier Digest",
+                "emoji": True
+            }
+        },
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Week of {today}* · {paper_count} cutting-edge paper{'s' if paper_count != 1 else ''} · _Lower evidence threshold, higher paradigm-shift potential_"
+                }
+            ]
+        }
+    ]
+    
+    # Add AI summary if available
+    if summary_text:
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": summary_text
+            }
+        })
+    
+    # Add usage stats footer if provided
+    if usage_stats:
+        api_calls = usage_stats.get("api_calls", 0)
+        total_tokens = usage_stats.get("total_input_tokens", 0) + usage_stats.get("total_output_tokens", 0)
+        model_name = usage_stats.get("model_name", "gemini")
+        
+        footer_parts = [f"{model_name}"]
+        footer_parts.append(f"{api_calls} calls")
+        if total_tokens > 0:
+            footer_parts.append(f"~{total_tokens:,} tokens")
+        
+        blocks.append({
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"_{' · '.join(footer_parts)}_"
+                }
+            ]
+        })
+    
+    payload = {"blocks": blocks}
+    
+    try:
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            timeout=30
+        )
+        response.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        print(f"Failed to post frontier header to Slack: {e}")
+        return False
+
+
+def post_frontier_paper(paper: Dict, rank: int) -> bool:
+    """
+    Post a single frontier paper with special badges for early-stage research.
+    
+    Includes:
+    - 🔬 EARLY STAGE badge for preprints/low-evidence papers
+    - 🧪 ITP badge for Interventions Testing Program papers
+    - Frontier score displayed
+    
+    Args:
+        paper: Paper dict with all fields
+        rank: Paper rank
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    webhook_url = get_webhook_url()
+    
+    title = paper.get("title", "Untitled")
+    journal = paper.get("journal", "Unknown journal")
+    authors = paper.get("authors", "")
+    pub_date = paper.get("date", paper.get("pub_date", ""))
+    url = paper.get("url", "")
+    doi = paper.get("doi", "")
+    
+    # Scores
+    evidence_score = paper.get("evidence_score", -1)
+    frontier_score = paper.get("frontier_score", -1)
+    is_itp = paper.get("is_itp", False)
+    is_preprint = paper.get("is_preprint", False)
+    
+    # Summary data
+    summary = paper.get("summary", {})
+    study_type = summary.get("study_type", "")
+    bottom_line = summary.get("bottom_line", "")
+    attia_take = summary.get("attia_take", "")
+    
+    # Get study type emoji
+    emoji = _get_study_emoji(study_type)
+    
+    # Format date
+    date_display = format_date(pub_date)
+    
+    # Truncate authors if too long
+    if len(authors) > 80:
+        authors = authors[:77] + "..."
+    
+    # Build message lines
+    lines = []
+    
+    # Build badges line
+    badges = []
+    if is_itp:
+        badges.append("🧪 *ITP*")
+    if is_preprint:
+        badges.append("📄 *PREPRINT*")
+    elif evidence_score >= 0 and evidence_score <= 5:
+        badges.append("🔬 *EARLY STAGE*")
+    
+    if frontier_score >= 8:
+        badges.append("⚡ *HIGH FRONTIER*")
+    
+    # Line 1: Badges (if any)
+    if badges:
+        lines.append(" · ".join(badges))
+        lines.append("")
+    
+    # Line 2: Emoji + Title + Journal
+    lines.append(f"{emoji} *{rank}. <{url}|{title}>*  —  _{journal}_")
+    lines.append("")
+    
+    # Line 3: Bottom line
+    if bottom_line:
+        lines.append(f"*{bottom_line}*")
+        lines.append("")
+    
+    # Line 4: Hot take
+    if attia_take:
+        lines.append(f"_{attia_take}_")
+        lines.append("")
+    
+    # Line 5: Scores + Meta
+    score_parts = []
+    if frontier_score >= 0:
+        score_parts.append(f"Frontier: {frontier_score}/10")
+    if evidence_score >= 0:
+        score_parts.append(f"Evidence: {evidence_score}/10")
+    
+    meta_parts = []
+    if authors:
+        meta_parts.append(authors)
+    if date_display:
+        meta_parts.append(date_display)
+    if doi:
+        doi_url = f"https://doi.org/{doi}" if not doi.startswith("http") else doi
+        meta_parts.append(f"<{doi_url}|Full text>")
+    if url and not is_preprint:
+        meta_parts.append(f"<{url}|PubMed>")
+    
+    if score_parts:
+        lines.append(" · ".join(score_parts))
+    if meta_parts:
+        lines.append(" · ".join(meta_parts))
+    
+    # Build payload
+    payload = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "\n".join(lines)
+                }
+            },
+            {"type": "divider"}
+        ]
+    }
+    
+    try:
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            timeout=30
+        )
+        response.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        print(f"Failed to post frontier paper {rank} to Slack: {e}")
+        return False
+
+
+def post_frontier_digest(
+    papers: List[Dict],
+    summary_text: Optional[str] = None,
+    usage_stats: Optional[Dict] = None,
+    verbose: bool = False
+) -> bool:
+    """
+    Post the frontier digest as multiple messages with frontier-specific formatting.
+    
+    Args:
+        papers: List of frontier papers to post
+        summary_text: AI-generated summary for the header
+        usage_stats: API usage statistics
+        verbose: Print progress information
+    
+    Returns:
+        True if all posts succeeded, False if any failed
+    """
+    if not papers:
+        return False
+    
+    all_success = True
+    
+    # Post header
+    if verbose:
+        print("  Posting frontier header...")
+    
+    if not post_frontier_header(len(papers), summary_text, usage_stats):
+        all_success = False
+    
+    # Post each paper with delay
+    for i, paper in enumerate(papers, 1):
+        time.sleep(1)  # Rate limit: 1 msg/sec
+        
+        if verbose:
+            print(f"  Posting frontier paper {i}/{len(papers)}...")
+        
+        if not post_frontier_paper(paper, i):
             all_success = False
     
     return all_success
