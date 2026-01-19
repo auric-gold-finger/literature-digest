@@ -526,7 +526,7 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     title = paper.get("title", "Untitled")
     journal = paper.get("journal", "Unknown journal")
     authors = paper.get("authors", "")
-    pub_date = paper.get("pub_date", "")
+    pub_date = paper.get("date", "")  # field is "date" not "pub_date"
     url = paper.get("url", "")
     doi = paper.get("doi", "")
     
