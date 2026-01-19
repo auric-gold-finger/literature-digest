@@ -29,7 +29,7 @@ from utils.config_loader import load_topics, load_whitelist, load_blacklist, loa
 from utils.query_builder import build_pubmed_query
 from utils.pubmed_headless import search_pubmed, fetch_pubmed_details
 from utils.altmetric_headless import enrich_papers_with_altmetric
-from utils.gemini_headless import batch_triage_papers
+from utils.gemini_headless import batch_triage_papers, summarize_papers_batch
 from utils.slack_poster import post_digest, post_error, post_no_papers_message
 from utils.notion_logger import log_papers_deduplicated
 
@@ -158,7 +158,13 @@ def run_daily_digest(verbose: bool = True) -> bool:
             post_no_papers_message(DAYS_BACK)
             return True
         
-        # Step 8: Post to Slack
+        # Step 8: Generate AI summaries for top papers
+        if verbose:
+            print("\nGenerating AI summaries...")
+        
+        top_papers = summarize_papers_batch(top_papers, verbose=verbose)
+        
+        # Step 9: Post to Slack
         if verbose:
             print("\nPosting to Slack...")
         
@@ -167,7 +173,7 @@ def run_daily_digest(verbose: bool = True) -> bool:
         if verbose:
             print(f"  Slack post: {'Success' if slack_success else 'Failed'}")
         
-        # Step 9: Log to Notion
+        # Step 10: Log to Notion
         if verbose:
             print("\nLogging to Notion...")
         

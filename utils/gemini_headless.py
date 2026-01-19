@@ -171,3 +171,117 @@ Altmetric Score: {altmetric_score}
             paper["triage_score"] = min(10, paper["triage_score"] + 2)
     
     return papers
+
+
+# --- Paper Summarization ---
+
+SUMMARIZE_PROMPT = """You are a scientific analyst summarizing research for a longevity-focused medical team.
+
+Given a paper's title and abstract, provide a structured summary with these exact fields:
+
+1. **study_type**: The type of study (e.g., "RCT", "Meta-analysis", "Cohort study", "Cross-sectional", "Case-control", "Systematic review", "Animal study", "In vitro", "Case report", "Editorial/Opinion")
+
+2. **tldr**: A single sentence (max 25 words) capturing the key finding or conclusion.
+
+3. **key_points**: 1-2 bullet points of actionable or clinically meaningful findings. Each bullet should be a single sentence.
+
+4. **why_selected**: One sentence explaining why this paper matters for a longevity-focused clinician—what makes it worth reading (clinical relevance, novel finding, practice implications, etc.)
+
+Return ONLY valid JSON with these exact keys: study_type, tldr, key_points (array), why_selected.
+No markdown, no extra text, just the JSON object.
+
+Title: {title}
+Abstract: {abstract}
+"""
+
+
+def summarize_paper(title: str, abstract: str) -> dict:
+    """
+    Generate a structured summary of a paper using Gemini.
+    
+    Args:
+        title: Paper title
+        abstract: Paper abstract
+    
+    Returns:
+        Dict with keys: study_type, tldr, key_points, why_selected
+        On failure, returns dict with fallback values using first sentence of abstract.
+    """
+    # Fallback: extract first sentence of abstract
+    def get_fallback():
+        first_sentence = abstract.split(". ")[0] if abstract else "No abstract available"
+        if not first_sentence.endswith("."):
+            first_sentence += "."
+        return {
+            "study_type": "Study",
+            "tldr": first_sentence[:150] + ("..." if len(first_sentence) > 150 else ""),
+            "key_points": [],
+            "why_selected": "Scored highly for relevance, evidence quality, and actionability."
+        }
+    
+    if not abstract or len(abstract.strip()) < 50:
+        return get_fallback()
+    
+    try:
+        model = get_gemini_model("gemini-2.0-flash")
+        
+        prompt = SUMMARIZE_PROMPT.format(
+            title=title,
+            abstract=abstract[:2000]  # Truncate very long abstracts
+        )
+        
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.4,
+                max_output_tokens=500
+            )
+        )
+        
+        content = response.text.strip()
+        
+        # Parse JSON response (handle markdown code blocks)
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+        
+        summary = json.loads(content)
+        
+        # Validate required fields
+        required = ["study_type", "tldr", "key_points", "why_selected"]
+        if not all(k in summary for k in required):
+            return get_fallback()
+        
+        # Ensure key_points is a list
+        if not isinstance(summary["key_points"], list):
+            summary["key_points"] = [summary["key_points"]] if summary["key_points"] else []
+        
+        return summary
+        
+    except Exception as e:
+        print(f"Summarization failed: {e}")
+        return get_fallback()
+
+
+def summarize_papers_batch(papers: list, verbose: bool = False) -> list:
+    """
+    Summarize a list of papers, adding 'summary' field to each.
+    
+    Args:
+        papers: List of paper dicts with 'title' and 'abstract' keys
+        verbose: Print progress information
+    
+    Returns:
+        Papers list with 'summary' dict added to each
+    """
+    for i, paper in enumerate(papers):
+        if verbose:
+            print(f"  Summarizing paper {i + 1}/{len(papers)}...")
+        
+        paper["summary"] = summarize_paper(
+            paper.get("title", ""),
+            paper.get("abstract", "")
+        )
+    
+    return papers
