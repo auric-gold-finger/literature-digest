@@ -508,12 +508,11 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     """
     Post a single paper as its own Slack message.
     
-    Structure:
-    - Line 1: Emoji + bold numbered title link
-    - Line 2: Bold bottom line (actionable takeaway)
-    - Line 3: Key finding with effect size
-    - Line 4: Context (population, magnitude, methods) - italicized
-    - Line 5: Footer - authors · journal · date · links · attention
+    Minimal format for scannability:
+    - Line 1: Emoji + title + journal
+    - Line 2: Bottom line (bold)
+    - Line 3: Hot take (2-3 sentences)
+    - Line 4: Links
     
     Args:
         paper: Paper dict with all fields
@@ -526,98 +525,42 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     
     title = paper.get("title", "Untitled")
     journal = paper.get("journal", "Unknown journal")
-    authors = paper.get("authors", "Unknown authors")
     url = paper.get("url", "")
     doi = paper.get("doi", "")
-    pub_date = paper.get("pub_date", "")
-    
-    # Altmetric data (for exceptional attention only)
-    altmetric_data = paper.get("altmetric", {})
-    altmetric_score = altmetric_data.get("score", 0)
-    twitter_count = altmetric_data.get("twitter", 0)
-    news_count = altmetric_data.get("news", 0)
     
     # Summary data
     summary = paper.get("summary", {})
     study_type = summary.get("study_type", "")
-    population = summary.get("population", "")
-    key_finding = summary.get("key_finding", "")
-    clinical_magnitude = summary.get("clinical_magnitude", "")
-    methods_notes = summary.get("methodological_notes", "")
     bottom_line = summary.get("bottom_line", "")
     attia_take = summary.get("attia_take", "")
     
     # Get study type emoji
     emoji = _get_study_emoji(study_type)
     
-    # Format date
-    date_display = format_date(pub_date)
-    
-    # Truncate authors
-    if len(authors) > 60:
-        authors = authors[:57] + "..."
-    
     # Build message lines
     lines = []
     
-    # Line 1: Emoji + Title
-    lines.append(f"{emoji} *{rank}. <{url}|{title}>*")
+    # Line 1: Emoji + Title + Journal (compact header)
+    lines.append(f"{emoji} *{rank}. <{url}|{title}>*  —  _{journal}_")
     
-    # Line 2: Bottom line (bold, promoted to top)
+    # Line 2: Bottom line (the actionable takeaway)
     if bottom_line:
         lines.append(f"*{bottom_line}*")
     
-    # Line 3: Key finding
-    if key_finding:
-        lines.append("")
-        lines.append(key_finding)
-    
-    # Line 4: Attia's Take (the opinionated commentary)
+    # Line 3: Hot take (the opinion/commentary)
     if attia_take:
-        lines.append("")
-        lines.append(f"*AI-PA:* _{attia_take}_")
+        lines.append(f"_{attia_take}_")
     
-    # Line 5: Context (condensed, italicized)
-    context_parts = []
-    if population and population != "See abstract for details.":
-        # Extract just the key demographics if possible
-        pop_short = population[:150] + "..." if len(population) > 150 else population
-        context_parts.append(pop_short)
-    if clinical_magnitude and clinical_magnitude != "Unable to assess from available information.":
-        mag_short = clinical_magnitude[:150] + "..." if len(clinical_magnitude) > 150 else clinical_magnitude
-        context_parts.append(mag_short)
-    if methods_notes and methods_notes != "Full appraisal requires review of complete paper.":
-        meth_short = methods_notes[:100] + "..." if len(methods_notes) > 100 else methods_notes
-        context_parts.append(meth_short)
-    
-    if context_parts:
-        lines.append("")
-        lines.append(f"_{' '.join(context_parts)}_")
-    
-    # Line 6: Compact footer
-    lines.append("")
-    footer_parts = [f"_{authors}_", f"_{journal}_"]
-    if date_display:
-        footer_parts.append(date_display)
+    # Line 4: Links (minimal)
+    links = []
     if doi:
         doi_url = f"https://doi.org/{doi}" if not doi.startswith("http") else doi
-        footer_parts.append(f"<{doi_url}|DOI>")
+        links.append(f"<{doi_url}|Full text>")
     if url:
-        footer_parts.append(f"<{url}|PubMed>")
+        links.append(f"<{url}|PubMed>")
     
-    # Exceptional attention only (raised thresholds)
-    attention_parts = []
-    if twitter_count >= 50:
-        attention_parts.append(f"🔥 {twitter_count} tweets")
-    if news_count >= 3:
-        attention_parts.append(f"📰 {news_count} news")
-    if altmetric_score >= 100 and not attention_parts:
-        attention_parts.append(f"⚡ Altmetric {altmetric_score}")
-    
-    if attention_parts:
-        footer_parts.append(", ".join(attention_parts))
-    
-    lines.append(" · ".join(footer_parts))
+    if links:
+        lines.append(" · ".join(links))
     
     # Build payload
     payload = {
