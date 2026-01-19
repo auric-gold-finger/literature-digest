@@ -29,8 +29,8 @@ from utils.config_loader import load_topics, load_whitelist, load_blacklist, loa
 from utils.query_builder import build_pubmed_query
 from utils.pubmed_headless import search_pubmed, fetch_pubmed_details
 from utils.altmetric_headless import enrich_papers_with_altmetric
-from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats
-from utils.slack_poster import post_digest, post_error, post_no_papers_message
+from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary
+from utils.slack_poster import post_digest_multi, post_error, post_no_papers_message
 from utils.notion_logger import log_papers_deduplicated, get_posted_pmids
 
 
@@ -180,18 +180,35 @@ def run_daily_digest(verbose: bool = True) -> bool:
         
         top_papers = summarize_papers_batch(top_papers, verbose=verbose)
         
-        # Step 10: Post to Slack
+        # Step 10: Generate digest summary (TL;DR)
         if verbose:
-            print("\nPosting to Slack...")
+            print("\nGenerating digest summary...")
         
-        # Get usage stats for the footer
+        digest_summary = generate_digest_summary(top_papers)
+        
+        if verbose:
+            if digest_summary:
+                print(f"  Summary: {digest_summary[:100]}...")
+            else:
+                print("  Summary generation failed (will post without)")
+        
+        # Step 11: Post to Slack (multi-message format)
+        if verbose:
+            print("\nPosting to Slack (multi-message)...")
+        
+        # Get usage stats for the header
         usage_stats = get_usage_stats()
-        slack_success = post_digest(top_papers, days=DAYS_BACK, usage_stats=usage_stats)
+        slack_success = post_digest_multi(
+            top_papers,
+            summary_text=digest_summary,
+            usage_stats=usage_stats,
+            verbose=verbose
+        )
         
         if verbose:
             print(f"  Slack post: {'Success' if slack_success else 'Failed'}")
         
-        # Step 11: Log to Notion
+        # Step 12: Log to Notion
         if verbose:
             print("\nLogging to Notion...")
         

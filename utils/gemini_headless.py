@@ -376,3 +376,78 @@ def summarize_papers_batch(papers: list, verbose: bool = False) -> list:
         )
     
     return papers
+
+
+# --- Digest Summary Generation ---
+
+DIGEST_SUMMARY_PROMPT = """You are writing the opening lines for a daily research digest aimed at longevity-focused physicians.
+
+Given the top papers for today (titles, key findings, and bottom lines), write a 2-3 sentence natural language summary that:
+1. Highlights the most interesting or practice-relevant finding
+2. Mentions 1-2 other notable themes if they exist
+3. Sounds like a smart colleague giving you a quick verbal overview
+
+Be direct and specific. Name the actual findings. No generic "several interesting papers" fluff.
+
+Example tone: "Big one today: first RCT showing zone 2 training beats HIIT for VO2max in over-60s. Also notable—new data on GLP-1 agonists and muscle mass, plus a concerning signal on high-dose vitamin D."
+
+Today's papers:
+{papers_summary}
+
+Write 2-3 sentences only. No bullet points, no headers, just conversational prose."""
+
+
+def generate_digest_summary(papers: List[Dict]) -> Optional[str]:
+    """
+    Generate a natural language summary of the day's top papers.
+    
+    Args:
+        papers: List of top papers with 'title', 'summary' dicts
+    
+    Returns:
+        2-3 sentence summary string, or None on failure
+    """
+    if not papers:
+        return None
+    
+    # Build condensed summary of papers for the prompt
+    papers_summary_parts = []
+    for i, paper in enumerate(papers, 1):
+        title = paper.get("title", "Untitled")
+        summary = paper.get("summary", {})
+        key_finding = summary.get("key_finding", "")
+        bottom_line = summary.get("bottom_line", "")
+        study_type = summary.get("study_type", "")
+        
+        paper_text = f"{i}. {title}"
+        if study_type:
+            paper_text += f" [{study_type}]"
+        if key_finding:
+            paper_text += f"\n   Finding: {key_finding}"
+        if bottom_line:
+            paper_text += f"\n   Bottom line: {bottom_line}"
+        papers_summary_parts.append(paper_text)
+    
+    papers_summary = "\n\n".join(papers_summary_parts)
+    
+    try:
+        client = get_genai_client()
+        
+        prompt = DIGEST_SUMMARY_PROMPT.format(papers_summary=papers_summary)
+        
+        response = client.models.generate_content(
+            model='gemini-3-pro',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.5,
+                max_output_tokens=200
+            )
+        )
+        
+        _track_usage(response, call_type="summary")
+        return response.text.strip()
+        
+    except Exception as e:
+        _usage_stats["errors"] += 1
+        print(f"Digest summary generation failed: {e}")
+        return None

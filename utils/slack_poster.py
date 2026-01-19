@@ -5,9 +5,49 @@ Posts formatted paper digests to Slack via incoming webhook.
 """
 
 import os
+import time
 import requests
 from datetime import datetime
 from typing import List, Dict, Optional
+
+
+# Study type to emoji mapping
+STUDY_TYPE_EMOJI = {
+    "RCT": "🧪",
+    "RANDOMIZED CONTROLLED TRIAL": "🧪",
+    "DOUBLE-BLIND RCT": "🧪",
+    "META-ANALYSIS": "📊",
+    "SYSTEMATIC REVIEW": "📚",
+    "REVIEW": "📚",
+    "COHORT": "📈",
+    "COHORT STUDY": "📈",
+    "PROSPECTIVE COHORT": "📈",
+    "RETROSPECTIVE COHORT": "📈",
+    "CASE-CONTROL": "🔍",
+    "CROSS-SECTIONAL": "📋",
+    "OBSERVATIONAL": "👁️",
+    "OBSERVATIONAL STUDY": "👁️",
+    "MENDELIAN RANDOMIZATION": "🧬",
+    "PILOT": "🚀",
+    "PILOT STUDY": "🚀",
+    "CASE REPORT": "📝",
+    "CASE SERIES": "📝",
+}
+
+
+def _get_study_emoji(study_type: str) -> str:
+    """Get emoji for study type, defaulting to 📄 if not found."""
+    if not study_type:
+        return "📄"
+    # Try exact match first, then prefix match
+    upper = study_type.upper().strip()
+    if upper in STUDY_TYPE_EMOJI:
+        return STUDY_TYPE_EMOJI[upper]
+    # Try prefix match (e.g., "RCT (N=500)" matches "RCT")
+    for key, emoji in STUDY_TYPE_EMOJI.items():
+        if upper.startswith(key):
+            return emoji
+    return "📄"
 
 
 def get_webhook_url() -> str:
@@ -376,3 +416,275 @@ def post_no_papers_message(days: int = 7) -> bool:
     except requests.RequestException as e:
         print(f"Failed to post to Slack: {e}")
         return False
+
+
+# --- New Multi-Message Posting Functions ---
+
+def post_digest_header(
+    paper_count: int,
+    summary_text: Optional[str] = None,
+    usage_stats: Optional[Dict] = None
+) -> bool:
+    """
+    Post the digest header message with AI-generated summary.
+    
+    Args:
+        paper_count: Number of papers in today's digest
+        summary_text: AI-generated 2-3 sentence summary of the day's highlights
+        usage_stats: Optional API usage statistics
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    webhook_url = get_webhook_url()
+    
+    today = datetime.now().strftime("%B %d, %Y")
+    
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "📬 Literature Digest",
+                "emoji": True
+            }
+        },
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"{today} · {paper_count} paper{'s' if paper_count != 1 else ''}"
+                }
+            ]
+        }
+    ]
+    
+    # Add AI summary if available
+    if summary_text:
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": summary_text
+            }
+        })
+    
+    # Add usage stats footer if provided
+    if usage_stats:
+        api_calls = usage_stats.get("api_calls", 0)
+        total_tokens = usage_stats.get("total_input_tokens", 0) + usage_stats.get("total_output_tokens", 0)
+        
+        footer_parts = [f"{api_calls} Gemini calls"]
+        if total_tokens > 0:
+            footer_parts.append(f"~{total_tokens:,} tokens")
+        
+        blocks.append({
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"_API: {', '.join(footer_parts)}_"
+                }
+            ]
+        })
+    
+    payload = {"blocks": blocks}
+    
+    try:
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            timeout=30
+        )
+        response.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        print(f"Failed to post digest header to Slack: {e}")
+        return False
+
+
+def post_single_paper(paper: Dict, rank: int) -> bool:
+    """
+    Post a single paper as its own Slack message.
+    
+    Structure:
+    - Line 1: Emoji + bold numbered title link
+    - Line 2: Bold bottom line (actionable takeaway)
+    - Line 3: Key finding with effect size
+    - Line 4: Context (population, magnitude, methods) - italicized
+    - Line 5: Footer - authors · journal · date · links · attention
+    
+    Args:
+        paper: Paper dict with all fields
+        rank: Paper rank (1-5)
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    webhook_url = get_webhook_url()
+    
+    title = paper.get("title", "Untitled")
+    journal = paper.get("journal", "Unknown journal")
+    authors = paper.get("authors", "Unknown authors")
+    url = paper.get("url", "")
+    doi = paper.get("doi", "")
+    pub_date = paper.get("pub_date", "")
+    
+    # Altmetric data (for exceptional attention only)
+    altmetric_data = paper.get("altmetric", {})
+    altmetric_score = altmetric_data.get("score", 0)
+    twitter_count = altmetric_data.get("twitter", 0)
+    news_count = altmetric_data.get("news", 0)
+    
+    # Summary data
+    summary = paper.get("summary", {})
+    study_type = summary.get("study_type", "")
+    population = summary.get("population", "")
+    key_finding = summary.get("key_finding", "")
+    clinical_magnitude = summary.get("clinical_magnitude", "")
+    methods_notes = summary.get("methodological_notes", "")
+    bottom_line = summary.get("bottom_line", "")
+    attia_take = summary.get("attia_take", "")
+    
+    # Get study type emoji
+    emoji = _get_study_emoji(study_type)
+    
+    # Format date
+    date_display = format_date(pub_date)
+    
+    # Truncate authors
+    if len(authors) > 60:
+        authors = authors[:57] + "..."
+    
+    # Build message lines
+    lines = []
+    
+    # Line 1: Emoji + Title
+    lines.append(f"{emoji} *{rank}. <{url}|{title}>*")
+    
+    # Line 2: Bottom line (bold, promoted to top)
+    if bottom_line:
+        lines.append(f"*{bottom_line}*")
+    
+    # Line 3: Key finding
+    if key_finding:
+        lines.append("")
+        lines.append(key_finding)
+    
+    # Line 4: Attia's Take (the opinionated commentary)
+    if attia_take:
+        lines.append("")
+        lines.append(f"*AI-PA:* _{attia_take}_")
+    
+    # Line 5: Context (condensed, italicized)
+    context_parts = []
+    if population and population != "See abstract for details.":
+        # Extract just the key demographics if possible
+        pop_short = population[:150] + "..." if len(population) > 150 else population
+        context_parts.append(pop_short)
+    if clinical_magnitude and clinical_magnitude != "Unable to assess from available information.":
+        mag_short = clinical_magnitude[:150] + "..." if len(clinical_magnitude) > 150 else clinical_magnitude
+        context_parts.append(mag_short)
+    if methods_notes and methods_notes != "Full appraisal requires review of complete paper.":
+        meth_short = methods_notes[:100] + "..." if len(methods_notes) > 100 else methods_notes
+        context_parts.append(meth_short)
+    
+    if context_parts:
+        lines.append("")
+        lines.append(f"_{' '.join(context_parts)}_")
+    
+    # Line 6: Compact footer
+    lines.append("")
+    footer_parts = [f"_{authors}_", f"_{journal}_"]
+    if date_display:
+        footer_parts.append(date_display)
+    if doi:
+        doi_url = f"https://doi.org/{doi}" if not doi.startswith("http") else doi
+        footer_parts.append(f"<{doi_url}|DOI>")
+    if url:
+        footer_parts.append(f"<{url}|PubMed>")
+    
+    # Exceptional attention only (raised thresholds)
+    attention_parts = []
+    if twitter_count >= 50:
+        attention_parts.append(f"🔥 {twitter_count} tweets")
+    if news_count >= 3:
+        attention_parts.append(f"📰 {news_count} news")
+    if altmetric_score >= 100 and not attention_parts:
+        attention_parts.append(f"⚡ Altmetric {altmetric_score}")
+    
+    if attention_parts:
+        footer_parts.append(", ".join(attention_parts))
+    
+    lines.append(" · ".join(footer_parts))
+    
+    # Build payload
+    payload = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "\n".join(lines)
+                }
+            }
+        ]
+    }
+    
+    try:
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            timeout=30
+        )
+        response.raise_for_status()
+        return True
+    except requests.RequestException as e:
+        print(f"Failed to post paper {rank} to Slack: {e}")
+        return False
+
+
+def post_digest_multi(
+    papers: List[Dict],
+    summary_text: Optional[str] = None,
+    usage_stats: Optional[Dict] = None,
+    verbose: bool = False
+) -> bool:
+    """
+    Post the full digest as multiple messages: header + one per paper.
+    
+    Includes 1-second delay between posts to respect Slack rate limits.
+    
+    Args:
+        papers: List of top papers to post
+        summary_text: AI-generated summary for the header
+        usage_stats: API usage statistics
+        verbose: Print progress information
+    
+    Returns:
+        True if all posts succeeded, False if any failed
+    """
+    if not papers:
+        return False
+    
+    all_success = True
+    
+    # Post header
+    if verbose:
+        print("  Posting header...")
+    
+    if not post_digest_header(len(papers), summary_text, usage_stats):
+        all_success = False
+    
+    # Post each paper with delay
+    for i, paper in enumerate(papers, 1):
+        time.sleep(1)  # Rate limit: 1 msg/sec
+        
+        if verbose:
+            print(f"  Posting paper {i}/{len(papers)}...")
+        
+        if not post_single_paper(paper, i):
+            all_success = False
+    
+    return all_success
