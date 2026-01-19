@@ -60,7 +60,7 @@ def _track_usage(response, call_type: str = "other"):
         pass  # Token tracking is best-effort
 
 
-def get_gemini_model(model_name: str = "gemini-2.5-pro"):
+def get_gemini_model(model_name: str = "gemini-2.0-flash"):
     """Get Gemini model instance (cached)."""
     if model_name not in _model_cache:
         api_key = os.environ.get("GEMINI_API_KEY", "")
@@ -134,7 +134,7 @@ def batch_triage_papers(
     Returns:
         Papers list with scores added. Blacklisted papers are removed.
     """
-    model = get_gemini_model("gemini-2.5-pro")
+    model = get_gemini_model("gemini-2.0-flash")
     
     whitelist = whitelist or []
     blacklist = blacklist or []
@@ -313,7 +313,7 @@ def summarize_paper(title: str, abstract: str) -> dict:
         return get_fallback()
     
     try:
-        model = get_gemini_model("gemini-2.5-pro")
+        model = get_gemini_model("gemini-2.0-flash")
         
         prompt = SUMMARIZE_PROMPT.format(
             title=title,
@@ -429,7 +429,7 @@ def generate_digest_summary(papers: List[Dict]) -> Optional[str]:
     papers_summary = "\n\n".join(papers_summary_parts)
     
     try:
-        model = get_gemini_model("gemini-2.5-pro")
+        model = get_gemini_model("gemini-2.0-flash")
         
         prompt = DIGEST_SUMMARY_PROMPT.format(papers_summary=papers_summary)
         
