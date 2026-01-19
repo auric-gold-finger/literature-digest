@@ -6,15 +6,15 @@ Includes three-dimensional scoring: relevance, evidence quality, and actionabili
 
 import json
 import streamlit as st
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from typing import List, Optional, Callable
 
 
 @st.cache_resource
-def get_gemini_model(model_name: str = "gemini-2.0-flash"):
-    """Get cached Gemini model instance."""
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    return genai.GenerativeModel(model_name)
+def get_genai_client():
+    """Get cached Google GenAI client instance."""
+    return genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 
 BATCH_TRIAGE_PROMPT = """You are an expert assistant for a longevity-focused research team (similar to Peter Attia's clinic).
@@ -75,7 +75,7 @@ def batch_triage_papers(
         Papers list with 'triage_score', 'evidence_score', 'actionability_score' added.
         Blacklisted papers are removed from the list.
     """
-    model = get_gemini_model("gemini-2.0-flash")
+    client = get_genai_client()
     
     whitelist = whitelist or []
     blacklist = blacklist or []
@@ -121,9 +121,10 @@ Altmetric Score: {altmetric_score}
         prompt = BATCH_TRIAGE_PROMPT + papers_text
         
         try:
-            response = model.generate_content(
-                prompt,
-                generation_config=genai.types.GenerationConfig(
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(
                     temperature=0.3,
                     max_output_tokens=1000
                 )
@@ -196,18 +197,19 @@ def summarize_paper(title: str, abstract: str) -> str:
     Returns:
         2-3 sentence summary
     """
-    model = get_gemini_model("gemini-2.0-flash")
+    client = get_genai_client()
     
     prompt = SUMMARIZE_PROMPT.format(title=title, abstract=abstract)
     
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 temperature=0.5,
                 max_output_tokens=300
             )
         )
         return response.text.strip()
     except Exception as e:
-        return f"⚠️ Summary unavailable: {e}"
+        return f"Summary unavailable: {e}"

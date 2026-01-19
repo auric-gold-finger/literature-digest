@@ -6,11 +6,12 @@ Batch triage scoring without Streamlit dependencies.
 
 import os
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from typing import List, Dict, Optional
 
 
-_model_cache = {}
+_client_cache = {}
 
 # Usage tracking
 _usage_stats = {
@@ -60,15 +61,14 @@ def _track_usage(response, call_type: str = "other"):
         pass  # Token tracking is best-effort
 
 
-def get_gemini_model(model_name: str = "gemini-2.0-flash"):
-    """Get Gemini model instance (cached)."""
-    if model_name not in _model_cache:
+def get_genai_client():
+    """Get Google GenAI client instance (cached)."""
+    if "client" not in _client_cache:
         api_key = os.environ.get("GEMINI_API_KEY", "")
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
-        genai.configure(api_key=api_key)
-        _model_cache[model_name] = genai.GenerativeModel(model_name)
-    return _model_cache[model_name]
+        _client_cache["client"] = genai.Client(api_key=api_key)
+    return _client_cache["client"]
 
 
 BATCH_TRIAGE_PROMPT = """You are an expert assistant for a longevity-focused research team (similar to Peter Attia's clinic).
@@ -134,7 +134,7 @@ def batch_triage_papers(
     Returns:
         Papers list with scores added. Blacklisted papers are removed.
     """
-    model = get_gemini_model("gemini-2.0-flash")
+    client = get_genai_client()
     
     whitelist = whitelist or []
     blacklist = blacklist or []
@@ -183,9 +183,10 @@ Altmetric Score: {altmetric_score}
         prompt = BATCH_TRIAGE_PROMPT + papers_text
         
         try:
-            response = model.generate_content(
-                prompt,
-                generation_config=genai.types.GenerationConfig(
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(
                     temperature=0.3,
                     max_output_tokens=1000
                 )
@@ -291,16 +292,17 @@ def summarize_paper(title: str, abstract: str) -> dict:
         return get_fallback()
     
     try:
-        model = get_gemini_model("gemini-2.0-flash")
+        client = get_genai_client()
         
         prompt = SUMMARIZE_PROMPT.format(
             title=title,
             abstract=abstract[:3000]  # Allow longer abstracts for better context
         )
         
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 temperature=0.3,  # Lower temp for more consistent critical analysis
                 max_output_tokens=1000  # More tokens for detailed appraisal
             )
