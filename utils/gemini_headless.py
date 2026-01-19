@@ -12,6 +12,9 @@ from typing import List, Dict, Optional
 
 _model_cache = {}
 
+# Default model name
+DEFAULT_MODEL = "gemini-2.0-flash"
+
 # Usage tracking
 _usage_stats = {
     "api_calls": 0,
@@ -19,7 +22,8 @@ _usage_stats = {
     "summary_calls": 0,
     "total_input_tokens": 0,
     "total_output_tokens": 0,
-    "errors": 0
+    "errors": 0,
+    "model_name": DEFAULT_MODEL
 }
 
 
@@ -37,7 +41,8 @@ def reset_usage_stats():
         "summary_calls": 0,
         "total_input_tokens": 0,
         "total_output_tokens": 0,
-        "errors": 0
+        "errors": 0,
+        "model_name": DEFAULT_MODEL
     }
 
 
@@ -60,8 +65,10 @@ def _track_usage(response, call_type: str = "other"):
         pass  # Token tracking is best-effort
 
 
-def get_gemini_model(model_name: str = "gemini-2.0-flash"):
+def get_gemini_model(model_name: str = None):
     """Get Gemini model instance (cached)."""
+    if model_name is None:
+        model_name = DEFAULT_MODEL
     if model_name not in _model_cache:
         api_key = os.environ.get("GEMINI_API_KEY", "")
         if not api_key:

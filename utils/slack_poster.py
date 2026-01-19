@@ -477,8 +477,10 @@ def post_digest_header(
     if usage_stats:
         api_calls = usage_stats.get("api_calls", 0)
         total_tokens = usage_stats.get("total_input_tokens", 0) + usage_stats.get("total_output_tokens", 0)
+        model_name = usage_stats.get("model_name", "gemini")
         
-        footer_parts = [f"{api_calls} Gemini calls"]
+        footer_parts = [f"{model_name}"]
+        footer_parts.append(f"{api_calls} calls")
         if total_tokens > 0:
             footer_parts.append(f"~{total_tokens:,} tokens")
         
@@ -487,7 +489,7 @@ def post_digest_header(
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"_API: {', '.join(footer_parts)}_"
+                    "text": f"_{' · '.join(footer_parts)}_"
                 }
             ]
         })
