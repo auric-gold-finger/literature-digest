@@ -5,6 +5,7 @@ Same functionality as pubmed.py but without Streamlit dependencies.
 """
 
 import os
+import time
 from datetime import datetime, timedelta
 from Bio import Entrez
 from typing import List, Dict
@@ -15,9 +16,45 @@ def get_entrez_email() -> str:
     return os.environ.get("NCBI_EMAIL", "user@example.com")
 
 
+def _retry_on_error(func, max_retries: int = 3, delay: int = 30):
+    """
+    Retry a function on transient errors with exponential backoff.
+    
+    Args:
+        func: Function to call
+        max_retries: Maximum number of retry attempts
+        delay: Initial delay in seconds (doubles each retry)
+    
+    Returns:
+        Result of the function call
+    
+    Raises:
+        Last exception if all retries fail
+    """
+    last_error = None
+    for attempt in range(max_retries + 1):
+        try:
+            return func()
+        except Exception as e:
+            last_error = e
+            error_str = str(e).lower()
+            # Only retry on transient server errors
+            if any(x in error_str for x in ["500", "503", "temporarily unavailable", "solr", "timeout"]):
+                if attempt < max_retries:
+                    wait_time = delay * (2 ** attempt)
+                    print(f"  PubMed error (attempt {attempt + 1}/{max_retries + 1}): {e}")
+                    print(f"  Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+            raise  # Non-transient error, don't retry
+    raise last_error
+
+
 def search_pubmed(query: str, days: int = 7, max_results: int = 200) -> List[str]:
     """
     Search PubMed for articles matching the query published in the last N days.
+    
+    Includes automatic retry on transient server errors.
     
     Args:
         query: PubMed search query string
@@ -32,21 +69,25 @@ def search_pubmed(query: str, days: int = 7, max_results: int = 200) -> List[str
     since = (datetime.today() - timedelta(days=days)).strftime("%Y/%m/%d")
     full_query = f"{query} AND ({since}[Date - Publication] : 3000[Date - Publication])"
     
-    handle = Entrez.esearch(
-        db="pubmed",
-        term=full_query,
-        retmax=max_results,
-        sort="relevance"
-    )
-    record = Entrez.read(handle)
-    handle.close()
+    def do_search():
+        handle = Entrez.esearch(
+            db="pubmed",
+            term=full_query,
+            retmax=max_results,
+            sort="relevance"
+        )
+        record = Entrez.read(handle)
+        handle.close()
+        return record.get("IdList", [])
     
-    return record.get("IdList", [])
+    return _retry_on_error(do_search)
 
 
 def fetch_pubmed_details(pmids: List[str]) -> List[Dict]:
     """
     Fetch article details for a list of PubMed IDs.
+    
+    Includes automatic retry on transient server errors.
     
     Args:
         pmids: List of PubMed IDs
@@ -60,9 +101,14 @@ def fetch_pubmed_details(pmids: List[str]) -> List[Dict]:
     Entrez.email = get_entrez_email()
     
     ids = ",".join(pmids)
-    handle = Entrez.efetch(db="pubmed", id=ids, rettype="abstract", retmode="xml")
-    records = Entrez.read(handle)
-    handle.close()
+    
+    def do_fetch():
+        handle = Entrez.efetch(db="pubmed", id=ids, rettype="abstract", retmode="xml")
+        records = Entrez.read(handle)
+        handle.close()
+        return records
+    
+    records = _retry_on_error(do_fetch)
     
     articles = []
     
