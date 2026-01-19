@@ -184,7 +184,7 @@ Altmetric Score: {altmetric_score}
         
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-3-pro',
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     temperature=0.3,
@@ -300,7 +300,7 @@ def summarize_paper(title: str, abstract: str) -> dict:
         )
         
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-3-pro',
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.3,  # Lower temp for more consistent critical analysis
