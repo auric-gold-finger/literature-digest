@@ -12,6 +12,53 @@ from typing import List, Dict, Optional
 
 _model_cache = {}
 
+# Usage tracking
+_usage_stats = {
+    "api_calls": 0,
+    "triage_calls": 0,
+    "summary_calls": 0,
+    "total_input_tokens": 0,
+    "total_output_tokens": 0,
+    "errors": 0
+}
+
+
+def get_usage_stats() -> dict:
+    """Get current usage statistics for this session."""
+    return _usage_stats.copy()
+
+
+def reset_usage_stats():
+    """Reset usage statistics (call at start of each run)."""
+    global _usage_stats
+    _usage_stats = {
+        "api_calls": 0,
+        "triage_calls": 0,
+        "summary_calls": 0,
+        "total_input_tokens": 0,
+        "total_output_tokens": 0,
+        "errors": 0
+    }
+
+
+def _track_usage(response, call_type: str = "other"):
+    """Track token usage from a Gemini response."""
+    _usage_stats["api_calls"] += 1
+    
+    if call_type == "triage":
+        _usage_stats["triage_calls"] += 1
+    elif call_type == "summary":
+        _usage_stats["summary_calls"] += 1
+    
+    # Extract token counts if available
+    try:
+        if hasattr(response, 'usage_metadata'):
+            metadata = response.usage_metadata
+            _usage_stats["total_input_tokens"] += getattr(metadata, 'prompt_token_count', 0)
+            _usage_stats["total_output_tokens"] += getattr(metadata, 'candidates_token_count', 0)
+    except Exception:
+        pass  # Token tracking is best-effort
+
 
 def get_gemini_model(model_name: str = "gemini-2.0-flash"):
     """Get Gemini model instance (cached)."""
@@ -144,6 +191,7 @@ Altmetric Score: {altmetric_score}
                 )
             )
             
+            _track_usage(response, call_type="triage")
             content = response.text.strip()
             
             # Parse JSON response
@@ -163,6 +211,7 @@ Altmetric Score: {altmetric_score}
                     batch[idx]["actionability_score"] = score_obj.get("actionability", -1)
                     
         except Exception as e:
+            _usage_stats["errors"] += 1
             print(f"Batch {batch_idx + 1} triage failed: {e}")
     
     # Apply whitelist boost (+2 to relevance, capped at 10)
@@ -257,6 +306,7 @@ def summarize_paper(title: str, abstract: str) -> dict:
             )
         )
         
+        _track_usage(response, call_type="summary")
         content = response.text.strip()
         
         # Parse JSON response (handle markdown code blocks)
@@ -276,6 +326,7 @@ def summarize_paper(title: str, abstract: str) -> dict:
         return summary
         
     except Exception as e:
+        _usage_stats["errors"] += 1
         print(f"Summarization failed: {e}")
         return get_fallback()
 

@@ -256,3 +256,48 @@ def log_papers_deduplicated(papers: List[Dict]) -> Dict[str, int]:
             results["failed"] += 1
     
     return results
+
+
+def get_posted_pmids(days_back: int = 14) -> set:
+    """
+    Get PMIDs of papers posted to Notion in the last N days.
+    Used for Slack deduplication—don't repost papers already in the digest.
+    
+    Args:
+        days_back: How many days to look back (default 14)
+    
+    Returns:
+        Set of PMID strings
+    """
+    try:
+        client = get_notion_client()
+        database_id = get_database_id()
+        
+        # Calculate cutoff date
+        from datetime import timedelta
+        cutoff_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+        
+        response = client.databases.query(
+            database_id=database_id,
+            filter={
+                "property": "Date Added",
+                "date": {
+                    "on_or_after": cutoff_date
+                }
+            }
+        )
+        
+        pmids = set()
+        for page in response.get("results", []):
+            pmid_prop = page.get("properties", {}).get("PMID", {})
+            rich_text = pmid_prop.get("rich_text", [])
+            if rich_text:
+                pmid = rich_text[0].get("text", {}).get("content", "")
+                if pmid:
+                    pmids.add(pmid)
+        
+        return pmids
+        
+    except Exception as e:
+        print(f"Failed to fetch posted PMIDs from Notion: {e}")
+        return set()  # On error, don't filter anything

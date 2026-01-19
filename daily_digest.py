@@ -29,9 +29,9 @@ from utils.config_loader import load_topics, load_whitelist, load_blacklist, loa
 from utils.query_builder import build_pubmed_query
 from utils.pubmed_headless import search_pubmed, fetch_pubmed_details
 from utils.altmetric_headless import enrich_papers_with_altmetric
-from utils.gemini_headless import batch_triage_papers, summarize_papers_batch
+from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats
 from utils.slack_poster import post_digest, post_error, post_no_papers_message
-from utils.notion_logger import log_papers_deduplicated
+from utils.notion_logger import log_papers_deduplicated, get_posted_pmids
 
 
 # Configuration
@@ -64,6 +64,9 @@ def run_daily_digest(verbose: bool = True) -> bool:
         True if successful, False otherwise
     """
     try:
+        # Reset usage stats at start of run
+        reset_usage_stats()
+        
         # Step 1: Load configuration
         if verbose:
             print("Loading configuration...")
@@ -132,7 +135,20 @@ def run_daily_digest(verbose: bool = True) -> bool:
         if verbose:
             print(f"  Scored {len(papers)} papers")
         
-        # Step 7: Sort and filter top papers
+        # Step 7: Filter out previously posted papers (Slack deduplication)
+        if verbose:
+            print("\nFiltering previously posted papers...")
+        
+        posted_pmids = get_posted_pmids(days_back=14)
+        
+        if posted_pmids:
+            original_count = len(papers)
+            papers = [p for p in papers if p.get("pmid", "") not in posted_pmids]
+            filtered = original_count - len(papers)
+            if verbose:
+                print(f"  Filtered {filtered} previously posted papers ({len(posted_pmids)} in Notion)")
+        
+        # Step 8: Sort and filter top papers
         if verbose:
             print("\nSelecting top papers...")
         
@@ -158,22 +174,24 @@ def run_daily_digest(verbose: bool = True) -> bool:
             post_no_papers_message(DAYS_BACK)
             return True
         
-        # Step 8: Generate AI summaries for top papers
+        # Step 9: Generate AI summaries for top papers
         if verbose:
             print("\nGenerating AI summaries...")
         
         top_papers = summarize_papers_batch(top_papers, verbose=verbose)
         
-        # Step 9: Post to Slack
+        # Step 10: Post to Slack
         if verbose:
             print("\nPosting to Slack...")
         
-        slack_success = post_digest(top_papers, days=DAYS_BACK)
+        # Get usage stats for the footer
+        usage_stats = get_usage_stats()
+        slack_success = post_digest(top_papers, days=DAYS_BACK, usage_stats=usage_stats)
         
         if verbose:
             print(f"  Slack post: {'Success' if slack_success else 'Failed'}")
         
-        # Step 10: Log to Notion
+        # Step 11: Log to Notion
         if verbose:
             print("\nLogging to Notion...")
         
@@ -183,6 +201,14 @@ def run_daily_digest(verbose: bool = True) -> bool:
                 print(f"  Notion: {notion_results['success']} added, {notion_results['skipped']} skipped, {notion_results['failed']} failed")
         except Exception as e:
             print(f"  Notion logging failed (non-fatal): {e}")
+        
+        # Print usage summary
+        if verbose:
+            print("\n📊 API Usage:")
+            print(f"  Gemini calls: {usage_stats['api_calls']} ({usage_stats['triage_calls']} triage, {usage_stats['summary_calls']} summary)")
+            print(f"  Tokens: ~{usage_stats['total_input_tokens'] + usage_stats['total_output_tokens']:,} total")
+            if usage_stats['errors'] > 0:
+                print(f"  Errors: {usage_stats['errors']}")
         
         if verbose:
             print("\n✅ Daily digest completed successfully!")
