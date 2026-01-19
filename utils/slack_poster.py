@@ -525,6 +525,8 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     
     title = paper.get("title", "Untitled")
     journal = paper.get("journal", "Unknown journal")
+    authors = paper.get("authors", "")
+    pub_date = paper.get("pub_date", "")
     url = paper.get("url", "")
     doi = paper.get("doi", "")
     
@@ -536,6 +538,13 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
     
     # Get study type emoji
     emoji = _get_study_emoji(study_type)
+    
+    # Format date
+    date_display = format_date(pub_date)
+    
+    # Truncate authors if too long
+    if len(authors) > 80:
+        authors = authors[:77] + "..."
     
     # Build message lines
     lines = []
@@ -554,16 +563,20 @@ def post_single_paper(paper: Dict, rank: int) -> bool:
         lines.append(f"_{attia_take}_")
         lines.append("")  # blank line after hot take
     
-    # Line 4: Links (minimal)
-    links = []
+    # Line 4: Meta line (authors, date, links)
+    meta_parts = []
+    if authors:
+        meta_parts.append(authors)
+    if date_display:
+        meta_parts.append(date_display)
     if doi:
         doi_url = f"https://doi.org/{doi}" if not doi.startswith("http") else doi
-        links.append(f"<{doi_url}|Full text>")
+        meta_parts.append(f"<{doi_url}|Full text>")
     if url:
-        links.append(f"<{url}|PubMed>")
+        meta_parts.append(f"<{url}|PubMed>")
     
-    if links:
-        lines.append(" · ".join(links))
+    if meta_parts:
+        lines.append(" · ".join(meta_parts))
     
     # Build payload with divider for visual separation between messages
     payload = {
