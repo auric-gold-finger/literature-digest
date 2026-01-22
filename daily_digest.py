@@ -26,7 +26,7 @@ import traceback
 
 # Import headless utilities (no Streamlit dependencies)
 from utils.config_loader import load_topics, load_whitelist, load_blacklist, load_exclusions
-from utils.query_builder import build_pubmed_query
+from utils.query_builder import build_pubmed_query, build_intersection_query, INTERSECTION_TEMPLATES
 from utils.pubmed_headless import search_pubmed, fetch_pubmed_details
 from utils.altmetric_headless import enrich_papers_with_altmetric
 from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary
@@ -39,6 +39,17 @@ DAYS_BACK = 7           # How many days to search
 MAX_RESULTS = 200       # Max papers to fetch from PubMed
 TOP_N_PAPERS = 5        # How many papers to post to Slack
 MIN_COMBINED_SCORE = 15 # Minimum combined score (rel + evid + action) to include
+
+# High-priority intersection queries to run (subset of INTERSECTION_TEMPLATES)
+# These find papers at the intersection of two domains - highly relevant to Attia audience
+PRIORITY_INTERSECTIONS = [
+    "glp1_muscle",          # GLP-1 & body composition (survey #2 request)
+    "exercise_cognition",   # Exercise & cognitive health (Four Horsemen)
+    "menopause_bone",       # Menopause & bone health (survey #1 request)
+    "protein_aging",        # Protein & older adults (survey top request)
+    "vo2max_mortality",     # VO2max & mortality (core Attia topic)
+    "sleep_cognition",      # Sleep & cognitive health (Four Horsemen)
+]
 
 
 def calculate_combined_score(paper: dict) -> int:
@@ -91,16 +102,37 @@ def run_daily_digest(verbose: bool = True) -> bool:
         if verbose:
             print(f"  Query length: {len(query)} chars")
         
-        # Step 3: Search PubMed
+        # Step 3: Search PubMed (standard broad query)
         if verbose:
             print(f"\nSearching PubMed (last {DAYS_BACK} days)...")
         
         pmids = search_pubmed(query, days=DAYS_BACK, max_results=MAX_RESULTS)
         
         if verbose:
-            print(f"  Found {len(pmids)} papers")
+            print(f"  Found {len(pmids)} papers from standard query")
         
-        if not pmids:
+        # Step 3b: Run priority intersection queries for highly-focused papers
+        if verbose:
+            print(f"\nRunning {len(PRIORITY_INTERSECTIONS)} intersection queries...")
+        
+        intersection_pmids = set()
+        for template_key in PRIORITY_INTERSECTIONS:
+            if template_key in INTERSECTION_TEMPLATES:
+                template = INTERSECTION_TEMPLATES[template_key]
+                int_query = build_intersection_query(template["groups"], exclusions)
+                int_results = search_pubmed(int_query, days=DAYS_BACK, max_results=50)
+                intersection_pmids.update(int_results)
+                if verbose:
+                    print(f"    {template['name']}: {len(int_results)} papers")
+        
+        # Merge PMIDs (intersection papers + standard query papers)
+        all_pmids = list(set(pmids) | intersection_pmids)
+        
+        if verbose:
+            new_from_intersections = len(intersection_pmids - set(pmids))
+            print(f"  Total unique PMIDs: {len(all_pmids)} ({new_from_intersections} new from intersections)")
+        
+        if not all_pmids:
             if verbose:
                 print("No papers found. Posting notification...")
             post_no_papers_message(DAYS_BACK)
@@ -110,7 +142,7 @@ def run_daily_digest(verbose: bool = True) -> bool:
         if verbose:
             print("\nFetching paper details...")
         
-        papers = fetch_pubmed_details(pmids)
+        papers = fetch_pubmed_details(all_pmids)
         
         if verbose:
             print(f"  Fetched {len(papers)} papers")
