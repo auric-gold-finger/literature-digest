@@ -10,7 +10,7 @@ Biomarkers & Clocks,"""epigenetic clock""[tiab] OR ""DNA methylation""[tiab] OR 
 Fasting & CR,"""caloric restriction""[tiab] OR ""intermittent fasting""[tiab] OR fasting[tiab] OR ""time-restricted eating""[tiab] OR autophagy[tiab]",TRUE,normal
 NAD+ & Sirtuins,"NAD[tiab] OR NMN[tiab] OR ""nicotinamide riboside""[tiab] OR sirtuin*[tiab] OR SIRT1[tiab]",TRUE,normal
 Metformin,metformin[tiab] OR AMPK[tiab],TRUE,normal
-Hormones & HRT,"testosterone[tiab] OR ""hormone replacement""[tiab] OR estrogen[tiab] OR DHEA[tiab] OR ""growth hormone""[tiab]",TRUE,normal
+Hormones & HRT,"testosterone[tiab] OR ""hormone replacement""[tiab] OR estrogen[tiab] OR DHEA[tiab] OR ""growth hormone""[tiab] OR menopause[tiab] OR perimenopause[tiab]",TRUE,normal
 Cancer Screening,"""cancer screening""[tiab] OR colonoscopy[tiab] OR ""liquid biopsy""[tiab] OR ""early detection""[tiab]",TRUE,normal
 Bone Health,"osteoporosis[tiab] OR ""bone density""[tiab] OR ""bone mineral""[tiab] OR fracture[tiab]",TRUE,normal
 Supplements,"spermidine[tiab] OR ""omega-3""[tiab] OR ""fish oil""[tiab] OR ""vitamin D""[tiab] OR creatine[tiab]",TRUE,normal
@@ -25,3 +25,7 @@ Heat & Cold Stress,"""heat shock""[tiab] OR sauna[tiab] OR ""cold exposure""[tia
 Glycine & Taurine,"(glycine[tiab] OR taurine[tiab]) AND (aging[tiab] OR longevity[tiab] OR lifespan[tiab])",TRUE,normal
 Alpha-ketoglutarate,"""alpha-ketoglutarate""[tiab] OR ""AKG""[tiab] AND aging[tiab]",TRUE,normal
 FOXO,"FOXO[tiab] OR ""FOXO3""[tiab] AND (longevity[tiab] OR aging[tiab])",TRUE,normal
+Protein & Muscle,"""protein intake""[tiab] OR ""protein synthesis""[tiab] OR sarcopenia[tiab] OR ""muscle mass""[tiab] OR ""muscle protein""[tiab] OR leucine[tiab] OR ""anabolic resistance""[tiab] OR ""muscle strength""[tiab]",TRUE,normal
+Statins & Lipid Drugs,"statin*[tiab] OR atorvastatin[tiab] OR rosuvastatin[tiab] OR pravastatin[tiab] OR ""bempedoic acid""[tiab] OR ezetimibe[tiab] OR ""PCSK9 inhibitor""[tiab] OR inclisiran[tiab]",TRUE,normal
+Pain & Musculoskeletal,"""chronic pain""[tiab] OR musculoskeletal[tiab] OR arthritis[tiab] OR ""joint health""[tiab] OR ""back pain""[tiab] OR ""Nav1.8""[tiab] OR suzetrigine[tiab] OR osteoarthritis[tiab]",TRUE,normal
+Menopause & Perimenopause,"menopause[tiab] OR perimenopause[tiab] OR postmenopausal[tiab] OR ""menopausal hormone therapy""[tiab] OR (""hormone therapy""[tiab] AND women[tiab])",TRUE,high

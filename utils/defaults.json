@@ -57,7 +57,7 @@
     },
     {
       "name": "Hormones & HRT",
-      "query_fragment": "testosterone[tiab] OR \"hormone replacement\"[tiab] OR estrogen[tiab] OR DHEA[tiab] OR \"growth hormone\"[tiab]",
+      "query_fragment": "testosterone[tiab] OR \"hormone replacement\"[tiab] OR estrogen[tiab] OR DHEA[tiab] OR \"growth hormone\"[tiab] OR menopause[tiab] OR perimenopause[tiab]",
       "active": true
     },
     {
@@ -130,6 +130,27 @@
       "name": "FOXO",
       "query_fragment": "(FOXO[tiab] OR FOXO3[tiab]) AND (longevity[tiab] OR aging[tiab])",
       "active": true
+    },
+    {
+      "name": "Protein & Muscle",
+      "query_fragment": "\"protein intake\"[tiab] OR \"protein synthesis\"[tiab] OR sarcopenia[tiab] OR \"muscle mass\"[tiab] OR \"muscle protein\"[tiab] OR leucine[tiab] OR \"anabolic resistance\"[tiab] OR \"muscle strength\"[tiab]",
+      "active": true
+    },
+    {
+      "name": "Statins & Lipid Drugs",
+      "query_fragment": "statin*[tiab] OR atorvastatin[tiab] OR rosuvastatin[tiab] OR pravastatin[tiab] OR \"bempedoic acid\"[tiab] OR ezetimibe[tiab] OR \"PCSK9 inhibitor\"[tiab] OR inclisiran[tiab]",
+      "active": true
+    },
+    {
+      "name": "Pain & Musculoskeletal",
+      "query_fragment": "\"chronic pain\"[tiab] OR musculoskeletal[tiab] OR arthritis[tiab] OR \"joint health\"[tiab] OR \"back pain\"[tiab] OR \"Nav1.8\"[tiab] OR suzetrigine[tiab] OR osteoarthritis[tiab]",
+      "active": true
+    },
+    {
+      "name": "Menopause & Perimenopause",
+      "query_fragment": "menopause[tiab] OR perimenopause[tiab] OR postmenopausal[tiab] OR \"menopausal hormone therapy\"[tiab] OR (\"hormone therapy\"[tiab] AND women[tiab])",
+      "active": true,
+      "priority": "high"
     }
   ],
   "authors_whitelist": [
