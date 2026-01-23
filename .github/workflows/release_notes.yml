@@ -1,0 +1,131 @@
+name: Post Release Notes to Slack
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      # Only trigger on code changes, not README or docs
+      - '*.py'
+      - 'utils/*.py'
+      - 'sheet_import/*.csv'
+      - 'requirements.txt'
+
+jobs:
+  post-release-notes:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit to get diff
+      
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=format:"%s" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=format:"%b" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "author=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
+          echo "sha=$(git log -1 --pretty=format:'%h')" >> $GITHUB_OUTPUT
+          echo "date=$(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_OUTPUT
+      
+      - name: Get changed files
+        id: changes
+        run: |
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          git diff --name-only HEAD~1 HEAD | head -10 >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          # Build the Slack message
+          COMMIT_MSG="${{ steps.commit.outputs.message }}"
+          COMMIT_BODY="${{ steps.commit.outputs.body }}"
+          COMMIT_SHA="${{ steps.commit.outputs.sha }}"
+          COMMIT_DATE="${{ steps.commit.outputs.date }}"
+          CHANGED_FILES="${{ steps.changes.outputs.files }}"
+          
+          # Create JSON payload
+          cat << 'PAYLOAD' > /tmp/slack_payload.json
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🚀 Literature Digest Updated",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*COMMIT_MSG_PLACEHOLDER*"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "COMMIT_BODY_PLACEHOLDER"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "📁 *Files changed:*\n```CHANGED_FILES_PLACEHOLDER```"
+                  }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "🔗 <https://github.com/auric-gold-finger/literature-digest/commit/COMMIT_SHA_PLACEHOLDER|View commit COMMIT_SHA_PLACEHOLDER> • COMMIT_DATE_PLACEHOLDER"
+                  }
+                ]
+              },
+              {
+                "type": "divider"
+              }
+            ]
+          }
+          PAYLOAD
+          
+          # Replace placeholders (using sed for safety with special chars)
+          sed -i "s|COMMIT_MSG_PLACEHOLDER|${COMMIT_MSG}|g" /tmp/slack_payload.json
+          sed -i "s|COMMIT_SHA_PLACEHOLDER|${COMMIT_SHA}|g" /tmp/slack_payload.json
+          sed -i "s|COMMIT_DATE_PLACEHOLDER|${COMMIT_DATE}|g" /tmp/slack_payload.json
+          
+          # Handle multiline body - replace newlines with \n for JSON
+          BODY_ESCAPED=$(echo "$COMMIT_BODY" | tr '\n' ' ' | sed 's/  */ /g')
+          if [ -z "$BODY_ESCAPED" ] || [ "$BODY_ESCAPED" = " " ]; then
+            BODY_ESCAPED="_No additional details_"
+          fi
+          sed -i "s|COMMIT_BODY_PLACEHOLDER|${BODY_ESCAPED}|g" /tmp/slack_payload.json
+          
+          # Handle changed files
+          FILES_ESCAPED=$(echo "$CHANGED_FILES" | tr '\n' ' ' | sed 's/  */ /g')
+          sed -i "s|CHANGED_FILES_PLACEHOLDER|${FILES_ESCAPED}|g" /tmp/slack_payload.json
+          
+          # Post to Slack
+          curl -X POST -H 'Content-type: application/json' \
+            --data @/tmp/slack_payload.json \
+            "$SLACK_WEBHOOK_URL"
+          
+          echo "✅ Release notes posted to Slack"
