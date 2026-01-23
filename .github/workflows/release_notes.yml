@@ -10,6 +10,10 @@ on:
       - 'utils/*.py'
       - 'sheet_import/*.csv'
       - 'requirements.txt'
+      - '.github/workflows/*.yml'
+  
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   post-release-notes:
