@@ -32,13 +32,21 @@ from utils.altmetric_headless import enrich_papers_with_altmetric
 from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary
 from utils.slack_poster import post_digest_multi, post_error, post_no_papers_message
 from utils.notion_logger import log_papers_deduplicated, get_posted_pmids
+from utils.constants import (
+    DEFAULT_DAYS_BACK,
+    DEFAULT_MAX_RESULTS,
+    INTERSECTION_MAX_RESULTS,
+    DAILY_TOP_N_PAPERS,
+    DAILY_MIN_COMBINED_SCORE,
+    DEDUP_LOOKBACK_DAYS,
+)
 
 
-# Configuration
-DAYS_BACK = 7           # How many days to search
-MAX_RESULTS = 200       # Max papers to fetch from PubMed
-TOP_N_PAPERS = 5        # How many papers to post to Slack
-MIN_COMBINED_SCORE = 15 # Minimum combined score (rel + evid + action) to include
+# Configuration - using centralized constants
+DAYS_BACK = DEFAULT_DAYS_BACK           # How many days to search
+MAX_RESULTS = DEFAULT_MAX_RESULTS       # Max papers to fetch from PubMed
+TOP_N_PAPERS = DAILY_TOP_N_PAPERS       # How many papers to post to Slack
+MIN_COMBINED_SCORE = DAILY_MIN_COMBINED_SCORE  # Minimum combined score (rel + evid + action) to include
 
 # High-priority intersection queries to run (subset of INTERSECTION_TEMPLATES)
 # These find papers at the intersection of two domains - highly relevant to Attia audience
@@ -120,7 +128,7 @@ def run_daily_digest(verbose: bool = True) -> bool:
             if template_key in INTERSECTION_TEMPLATES:
                 template = INTERSECTION_TEMPLATES[template_key]
                 int_query = build_intersection_query(template["groups"], exclusions)
-                int_results = search_pubmed(int_query, days=DAYS_BACK, max_results=50)
+                int_results = search_pubmed(int_query, days=DAYS_BACK, max_results=INTERSECTION_MAX_RESULTS)
                 intersection_pmids.update(int_results)
                 if verbose:
                     print(f"    {template['name']}: {len(int_results)} papers")
@@ -171,7 +179,7 @@ def run_daily_digest(verbose: bool = True) -> bool:
         if verbose:
             print("\nFiltering previously posted papers...")
         
-        posted_pmids = get_posted_pmids(days_back=14)
+        posted_pmids = get_posted_pmids(days_back=DEDUP_LOOKBACK_DAYS)
         
         if posted_pmids:
             original_count = len(papers)
