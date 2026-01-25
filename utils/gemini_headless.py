@@ -9,11 +9,26 @@ import json
 import google.generativeai as genai
 from typing import List, Dict, Optional
 
+from utils.constants import (
+    DEFAULT_GEMINI_MODEL,
+    TRIAGE_BATCH_SIZE,
+    TRIAGE_ABSTRACT_MAX_CHARS,
+    SUMMARY_ABSTRACT_MAX_CHARS,
+    TRIAGE_MAX_OUTPUT_TOKENS,
+    SUMMARY_MAX_OUTPUT_TOKENS,
+    TRIAGE_TEMPERATURE,
+    SUMMARY_TEMPERATURE,
+    DIGEST_SUMMARY_TEMPERATURE,
+    DIGEST_SUMMARY_MAX_TOKENS,
+    WHITELIST_RELEVANCE_BOOST,
+    MAX_RELEVANCE_SCORE,
+)
+
 
 _model_cache = {}
 
-# Default model name
-DEFAULT_MODEL = "gemini-2.0-flash"
+# Use centralized constant for model name
+DEFAULT_MODEL = DEFAULT_GEMINI_MODEL
 
 # Usage tracking
 _usage_stats = {
