@@ -25,11 +25,11 @@ import sys
 import traceback
 
 # Import utilities
-from utils.config_loader import load_topics, load_whitelist, load_blacklist, load_exclusions
+from utils.config_loader import load_topics, load_whitelist, load_blacklist, load_exclusions, load_high_priority_topics
 from utils.query_builder import build_pubmed_query
 from utils.pubmed_headless import search_pubmed, fetch_pubmed_details
 from utils.altmetric_headless import enrich_papers_with_altmetric
-from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary
+from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary, apply_priority_topic_boost
 from utils.slack_poster import post_frontier_digest, post_error, post_no_papers_message
 from utils.notion_logger import log_papers_deduplicated, get_posted_pmids
 from utils.preprint import search_longevity_preprints, get_itp_preprints
@@ -118,10 +118,12 @@ def run_frontier_digest(verbose: bool = True) -> bool:
         whitelist = load_whitelist()
         blacklist = load_blacklist()
         exclusions = load_exclusions()
+        high_priority_topics = load_high_priority_topics()
         
         if verbose:
             print(f"  Topics: {len(topics)}")
             print(f"  Whitelist: {len(whitelist)} authors")
+            print(f"  High-priority topics: {len(high_priority_topics)}")
         
         # Step 2: Build query and search PubMed
         if verbose:
@@ -211,6 +213,16 @@ def run_frontier_digest(verbose: bool = True) -> bool:
             papers,
             whitelist=whitelist,
             blacklist=blacklist,
+            verbose=verbose
+        )
+        
+        # Step 7b: Apply priority topic boost (+1 for sleep, hormones, etc.)
+        if verbose:
+            print("\n⬆️ Applying priority topic boost...")
+        
+        papers = apply_priority_topic_boost(
+            papers,
+            high_priority_topics,
             verbose=verbose
         )
         

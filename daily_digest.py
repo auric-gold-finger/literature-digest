@@ -25,11 +25,11 @@ import sys
 import traceback
 
 # Import headless utilities (no Streamlit dependencies)
-from utils.config_loader import load_topics, load_whitelist, load_blacklist, load_exclusions
+from utils.config_loader import load_topics, load_whitelist, load_blacklist, load_exclusions, load_high_priority_topics
 from utils.query_builder import build_pubmed_query, build_intersection_query, INTERSECTION_TEMPLATES
 from utils.pubmed_headless import search_pubmed, fetch_pubmed_details
 from utils.altmetric_headless import enrich_papers_with_altmetric
-from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary
+from utils.gemini_headless import batch_triage_papers, summarize_papers_batch, get_usage_stats, reset_usage_stats, generate_digest_summary, apply_priority_topic_boost
 from utils.slack_poster import post_digest_multi, post_error, post_no_papers_message
 from utils.notion_logger import log_papers_deduplicated, get_posted_pmids
 from utils.constants import (
@@ -94,12 +94,14 @@ def run_daily_digest(verbose: bool = True) -> bool:
         whitelist = load_whitelist()
         blacklist = load_blacklist()
         exclusions = load_exclusions()
+        high_priority_topics = load_high_priority_topics()
         
         if verbose:
             print(f"  Topics: {len(topics)}")
             print(f"  Whitelist: {len(whitelist)} authors")
             print(f"  Blacklist: {len(blacklist)} authors")
             print(f"  Exclusions: {len(exclusions)} terms")
+            print(f"  High-priority topics: {len(high_priority_topics)}")
         
         # Step 2: Build query
         if verbose:
@@ -174,6 +176,16 @@ def run_daily_digest(verbose: bool = True) -> bool:
         
         if verbose:
             print(f"  Scored {len(papers)} papers")
+        
+        # Step 6b: Apply priority topic boost (+1 for sleep, hormones, etc.)
+        if verbose:
+            print("\nApplying priority topic boost...")
+        
+        papers = apply_priority_topic_boost(
+            papers,
+            high_priority_topics,
+            verbose=verbose
+        )
         
         # Step 7: Filter out previously posted papers (Slack deduplication)
         if verbose:

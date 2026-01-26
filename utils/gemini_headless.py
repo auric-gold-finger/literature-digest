@@ -98,7 +98,7 @@ BATCH_TRIAGE_PROMPT = """You are an expert assistant for a longevity-focused res
 Given a batch of research papers (title, abstract, altmetric score), score each paper on FOUR dimensions:
 
 1. **Relevance Score (0-10)**: How important is this paper for longevity, healthspan, or clinical decision-making?
-   - 9-10: Directly addresses core longevity topics (cardiovascular, metabolism, exercise, sleep, neurodegeneration, cancer)
+   - 9-10: Directly addresses core longevity topics (cardiovascular, metabolism, exercise, sleep, hormones/HRT, neurodegeneration, cancer). Papers on SLEEP or HORMONES/HRT should be weighted toward the higher end of this range.
    - 7-8: Related to aging interventions, biomarkers, or healthspan optimization
    - 5-6: Tangentially relevant or narrow population
    - 0-4: Animal-only, mechanistic, rare diseases, or unrelated fields
@@ -250,6 +250,72 @@ Altmetric Score: {altmetric_score}
     for paper in papers:
         if paper.get("whitelisted") and paper["triage_score"] >= 0:
             paper["triage_score"] = min(10, paper["triage_score"] + 2)
+    
+    return papers
+
+
+def apply_priority_topic_boost(
+    papers: List[Dict],
+    high_priority_topics: List[Dict],
+    boost: int = 1,
+    verbose: bool = False
+) -> List[Dict]:
+    """
+    Apply relevance score boost to papers matching high-priority topics.
+    
+    Checks if paper title/abstract contains keywords from high-priority topic
+    query fragments (sleep, hormones, etc.).
+    
+    Args:
+        papers: List of paper dicts with 'title', 'abstract', 'triage_score'
+        high_priority_topics: List of topic dicts with 'name', 'query_fragment'
+        boost: Points to add to triage_score (default 1)
+        verbose: Print progress information
+    
+    Returns:
+        Papers list with boosted scores for matching papers
+    """
+    from utils.constants import MAX_RELEVANCE_SCORE
+    
+    if not high_priority_topics:
+        return papers
+    
+    # Extract keywords from topic query fragments
+    # E.g. "sleep[tiab] OR circadian[tiab]" -> ["sleep", "circadian"]
+    priority_keywords = set()
+    topic_names = []
+    for topic in high_priority_topics:
+        topic_names.append(topic.get("name", ""))
+        fragment = topic.get("query_fragment", "").lower()
+        # Extract words before [tiab] markers
+        import re
+        words = re.findall(r'([a-z0-9-]+)\[tiab\]', fragment)
+        # Also extract quoted phrases
+        phrases = re.findall(r'"([^"]+)"', fragment)
+        priority_keywords.update(words)
+        priority_keywords.update(w.lower() for p in phrases for w in p.split())
+    
+    if verbose:
+        print(f"  Priority topics: {', '.join(topic_names)}")
+        print(f"  Priority keywords: {len(priority_keywords)} terms")
+    
+    boosted_count = 0
+    for paper in papers:
+        if paper.get("triage_score", -1) < 0:
+            continue
+            
+        # Check title and abstract for priority keywords
+        text = f"{paper.get('title', '')} {paper.get('abstract', '')}".lower()
+        
+        if any(kw in text for kw in priority_keywords):
+            old_score = paper["triage_score"]
+            paper["triage_score"] = min(MAX_RELEVANCE_SCORE, paper["triage_score"] + boost)
+            paper["priority_boosted"] = True
+            if paper["triage_score"] > old_score:
+                boosted_count += 1
+    
+    if verbose and boosted_count:
+        print(f"  Applied +{boost} priority boost to {boosted_count} papers")
     
     return papers
 

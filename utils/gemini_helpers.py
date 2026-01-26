@@ -22,7 +22,7 @@ BATCH_TRIAGE_PROMPT = """You are an expert assistant for a longevity-focused res
 Given a batch of research papers (title, abstract, altmetric score), score each paper on THREE dimensions:
 
 1. **Relevance Score (0-10)**: How important is this paper for longevity, healthspan, or clinical decision-making?
-   - 9-10: Directly addresses core longevity topics (cardiovascular, metabolism, exercise, sleep, neurodegeneration, cancer)
+   - 9-10: Directly addresses core longevity topics (cardiovascular, metabolism, exercise, sleep, hormones/HRT, neurodegeneration, cancer). Papers on SLEEP or HORMONES/HRT should be weighted toward the higher end of this range.
    - 7-8: Related to aging interventions, biomarkers, or healthspan optimization
    - 5-6: Tangentially relevant or narrow population
    - 0-4: Animal-only, mechanistic, rare diseases, or unrelated fields

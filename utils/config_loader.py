@@ -154,3 +154,20 @@ def load_exclusions() -> List[str]:
     config = load_config()
     exclusions = config.get("exclusions", [])
     return [e.get("term", "") for e in exclusions if e.get("active", True) and e.get("term")]
+
+
+def load_high_priority_topics() -> List[Dict]:
+    """
+    Get list of high-priority topics (priority='high' or 'always').
+    
+    These topics receive a relevance score boost after AI scoring.
+    
+    Returns:
+        List of topic dicts with keys: name, query_fragment, priority
+    """
+    config = load_config()
+    topics = config.get("topics", [])
+    return [
+        t for t in topics 
+        if t.get("active", True) and t.get("priority") in ("high", "always")
+    ]

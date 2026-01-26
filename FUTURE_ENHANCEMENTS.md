@@ -52,13 +52,20 @@ Create `sheet_import/journals_whitelist.csv` with top-tier journals (NEJM, Lance
 ---
 
 ### 4. Activate Priority Field
-**Status:** Planned  
+**Status:** ✅ Implemented  
 **Priority:** Low
 
 **Description:**  
 The `priority` column exists in topics.csv but is currently unused. Implement logic to:
 - Always include `priority=always` topics regardless of preset
 - Give `priority=high` topics a +1 boost to relevance score
+
+**Implementation (Jan 2026):**
+- Added `priority: "high"` to Sleep and Hormones & HRT topics in defaults.json
+- Updated AI scoring prompt to explicitly weight sleep/hormones higher
+- Added `apply_priority_topic_boost()` function in gemini_headless.py
+- Added `load_high_priority_topics()` function in config_loader.py
+- Both daily_digest.py and frontier_digest.py now apply +1 boost to papers matching high-priority topic keywords
 
 ---
 

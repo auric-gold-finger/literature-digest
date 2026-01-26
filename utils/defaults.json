@@ -3,77 +3,92 @@
     {
       "name": "Cardiovascular",
       "query_fragment": "\"cardiovascular disease\"[tiab] OR atherosclerosis[tiab] OR \"coronary artery disease\"[tiab] OR ApoB[tiab] OR \"Lp(a)\"[tiab] OR PCSK9[tiab] OR \"heart failure\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Metabolism",
       "query_fragment": "\"insulin resistance\"[tiab] OR hyperinsulinemia[tiab] OR \"metabolic syndrome\"[tiab] OR \"GLP-1\"[tiab] OR SGLT2[tiab] OR acarbose[tiab] OR \"glucose variability\"[tiab] OR CGM[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Exercise",
       "query_fragment": "exercise[tiab] OR \"physical activity\"[tiab] OR \"resistance training\"[tiab] OR HIIT[tiab] OR VO2[tiab] OR \"zone 2\"[tiab] OR \"cardiorespiratory fitness\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Sleep",
       "query_fragment": "sleep[tiab] OR \"sleep apnea\"[tiab] OR circadian[tiab] OR melatonin[tiab] OR CPAP[tiab] OR insomnia[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Neurodegeneration",
       "query_fragment": "dementia[tiab] OR \"Alzheimer disease\"[tiab] OR neurodegeneration[tiab] OR \"cognitive decline\"[tiab] OR \"brain aging\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Senolytics",
       "query_fragment": "senolytic*[tiab] OR senescence[tiab] OR \"senescent cells\"[tiab] OR dasatinib[tiab] OR quercetin[tiab] OR fisetin[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "mTOR & Rapamycin",
       "query_fragment": "rapamycin[tiab] OR \"mTOR\"[tiab] OR sirolimus[tiab] OR everolimus[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Biomarkers & Clocks",
       "query_fragment": "\"epigenetic clock\"[tiab] OR \"DNA methylation\"[tiab] OR proteomic*[tiab] OR metabolomic*[tiab] OR biomarker*[tiab] OR \"biological age\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Fasting & CR",
       "query_fragment": "\"caloric restriction\"[tiab] OR \"intermittent fasting\"[tiab] OR fasting[tiab] OR \"time-restricted eating\"[tiab] OR autophagy[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "NAD+ & Sirtuins",
       "query_fragment": "NAD[tiab] OR NMN[tiab] OR \"nicotinamide riboside\"[tiab] OR sirtuin*[tiab] OR SIRT1[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Metformin",
       "query_fragment": "metformin[tiab] OR AMPK[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Hormones & HRT",
       "query_fragment": "testosterone[tiab] OR \"hormone replacement\"[tiab] OR estrogen[tiab] OR DHEA[tiab] OR \"growth hormone\"[tiab] OR menopause[tiab] OR perimenopause[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Cancer Screening",
       "query_fragment": "\"cancer screening\"[tiab] OR colonoscopy[tiab] OR \"liquid biopsy\"[tiab] OR \"early detection\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Bone Health",
       "query_fragment": "osteoporosis[tiab] OR \"bone density\"[tiab] OR \"bone mineral\"[tiab] OR fracture[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Supplements",
       "query_fragment": "spermidine[tiab] OR \"omega-3\"[tiab] OR \"fish oil\"[tiab] OR \"vitamin D\"[tiab] OR creatine[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "ITP Results",
@@ -84,67 +99,80 @@
     {
       "name": "Mitochondria",
       "query_fragment": "mitochondri*[tiab] OR \"mitochondrial biogenesis\"[tiab] OR PGC-1alpha[tiab] OR \"mitochondrial dysfunction\"[tiab] OR mitophagy[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Telomeres",
       "query_fragment": "telomer*[tiab] OR telomerase[tiab] OR \"telomere length\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Klotho",
       "query_fragment": "klotho[tiab] OR \"alpha-klotho\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Reprogramming",
       "query_fragment": "\"partial reprogramming\"[tiab] OR \"cellular reprogramming\"[tiab] OR Yamanaka[tiab] OR \"epigenetic reprogramming\"[tiab] OR \"OSK factors\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Tirzepatide & GIP",
       "query_fragment": "tirzepatide[tiab] OR retatrutide[tiab] OR \"dual GIP/GLP-1\"[tiab] OR \"triple agonist\"[tiab] OR \"GIP agonist\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Parabiosis",
       "query_fragment": "\"young blood\"[tiab] OR parabiosis[tiab] OR \"plasma exchange\"[tiab] OR \"plasma dilution\"[tiab] OR heterochronic[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Heat & Cold Stress",
       "query_fragment": "\"heat shock\"[tiab] OR sauna[tiab] OR \"cold exposure\"[tiab] OR \"cold shock\"[tiab] OR thermogenesis[tiab] OR \"brown adipose\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Glycine & Taurine",
       "query_fragment": "(glycine[tiab] OR taurine[tiab]) AND (aging[tiab] OR longevity[tiab] OR lifespan[tiab])",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Alpha-ketoglutarate",
       "query_fragment": "\"alpha-ketoglutarate\"[tiab] OR (AKG[tiab] AND aging[tiab])",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "FOXO",
       "query_fragment": "(FOXO[tiab] OR FOXO3[tiab]) AND (longevity[tiab] OR aging[tiab])",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Protein & Muscle",
       "query_fragment": "\"protein intake\"[tiab] OR \"protein synthesis\"[tiab] OR sarcopenia[tiab] OR \"muscle mass\"[tiab] OR \"muscle protein\"[tiab] OR leucine[tiab] OR \"anabolic resistance\"[tiab] OR \"muscle strength\"[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Statins & Lipid Drugs",
       "query_fragment": "statin*[tiab] OR atorvastatin[tiab] OR rosuvastatin[tiab] OR pravastatin[tiab] OR \"bempedoic acid\"[tiab] OR ezetimibe[tiab] OR \"PCSK9 inhibitor\"[tiab] OR inclisiran[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Pain & Musculoskeletal",
       "query_fragment": "\"chronic pain\"[tiab] OR musculoskeletal[tiab] OR arthritis[tiab] OR \"joint health\"[tiab] OR \"back pain\"[tiab] OR \"Nav1.8\"[tiab] OR suzetrigine[tiab] OR osteoarthritis[tiab]",
-      "active": true
+      "active": true,
+      "priority": "high"
     },
     {
       "name": "Menopause & Perimenopause",

@@ -84,6 +84,9 @@ FRONTIER_TOP_N_PAPERS = 7
 # Relevance score boost for whitelisted authors
 WHITELIST_RELEVANCE_BOOST = 2
 
+# Relevance score boost for high-priority topics (sleep, hormones/HRT)
+PRIORITY_TOPIC_BOOST = 1
+
 # Maximum relevance score (cap after boost)
 MAX_RELEVANCE_SCORE = 10
 
