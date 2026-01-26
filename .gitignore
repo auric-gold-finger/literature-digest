@@ -23,3 +23,6 @@ Thumbs.db
 
 # Output files
 *.html
+
+# RSS seen items cache
+.rss_seen_items.json

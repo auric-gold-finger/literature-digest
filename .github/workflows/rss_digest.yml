@@ -1,0 +1,48 @@
+name: RSS Longevity News Digest
+
+on:
+  # Run daily at 6 AM ET (11 AM UTC) - 1 hour after daily digest
+  schedule:
+    - cron: '0 11 * * *'
+  
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  run-rss-digest:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install feedparser requests
+      
+      - name: Restore seen items cache
+        uses: actions/cache@v4
+        with:
+          path: .rss_seen_items.json
+          key: rss-seen-items-${{ github.run_id }}
+          restore-keys: |
+            rss-seen-items-
+      
+      - name: Run RSS digest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python rss_digest.py
+      
+      - name: Save seen items cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .rss_seen_items.json
+          key: rss-seen-items-${{ github.run_id }}
